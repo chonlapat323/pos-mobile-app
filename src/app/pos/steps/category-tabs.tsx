@@ -13,7 +13,7 @@ interface CategoryTabsProps {
 
 export function CategoryTabs({ categories, selectedId, onSelect }: CategoryTabsProps) {
   return (
-    <div className="flex gap-3 overflow-x-auto pb-2">
+    <div className="flex gap-2.5 overflow-x-auto pb-2">
       {categories.map((category) => {
         const isSelected = selectedId === category.id;
         return (
@@ -22,24 +22,19 @@ export function CategoryTabs({ categories, selectedId, onSelect }: CategoryTabsP
             type="button"
             onClick={() => onSelect(category.id)}
             className={cn(
-              "flex shrink-0 flex-col items-center gap-1.5 rounded-2xl border p-2 transition-all active:scale-95",
-              isSelected ? "border-accent bg-accent-soft shadow-xs" : "border-border bg-surface hover:bg-default",
+              "flex shrink-0 items-center gap-2.5 rounded-2xl border py-1.5 pr-3.5 pl-1.5 transition-all active:scale-95",
+              isSelected ? "border-accent bg-accent-soft" : "border-border bg-surface hover:bg-surface-tertiary",
             )}
           >
-            <div
-              className={cn(
-                "flex size-16 items-center justify-center overflow-hidden rounded-xl bg-default",
-                isSelected && "ring-2 ring-accent",
-              )}
-            >
+            <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-default">
               {/* biome-ignore lint/performance/noImgElement: local dev image server, next/image remote-pattern config not worth it yet */}
               <img
-                src={category.imageUrl || mockPhotoUrl(category.id, 120, 120)}
+                src={category.imageUrl || mockPhotoUrl(category.id, 80, 80)}
                 alt=""
                 className="size-full object-cover"
               />
-            </div>
-            <span className={cn("max-w-20 truncate font-medium text-xs", isSelected ? "text-accent" : "text-soft")}>
+            </span>
+            <span className={cn("whitespace-nowrap font-medium text-sm", isSelected ? "text-accent" : "text-soft")}>
               {category.name}
             </span>
           </button>
