@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
 
-import { Button, toast } from "@heroui/react";
-import { LogOut } from "lucide-react";
+import { Button, Modal, toast } from "@heroui/react";
+import { LogOut, User } from "lucide-react";
 
 import { logout } from "@/lib/auth";
 
@@ -15,7 +15,7 @@ import { ServiceStep } from "./steps/service-step";
 import { SuccessStep } from "./steps/success-step";
 import type { Bill, CartLine, Category, Member, PaymentMethod } from "./types";
 
-type Step = "member" | "service" | "cart" | "payment" | "success";
+type Step = "service" | "cart" | "payment" | "success";
 
 interface PosState {
   step: Step;
@@ -45,7 +45,7 @@ type PosAction =
   | { type: "RESET" };
 
 const initialState: PosState = {
-  step: "member",
+  step: "service",
   member: null,
   cart: [],
   discount: 0,
@@ -113,11 +113,10 @@ function posReducer(state: PosState, action: PosAction): PosState {
 }
 
 const STEP_LABELS: Record<Step, string> = {
-  member: "1. ลูกค้า",
-  service: "2. บริการ",
-  cart: "3. ตรวจสอบ",
-  payment: "4. ชำระเงิน",
-  success: "5. เสร็จสิ้น",
+  service: "เลือกบริการ",
+  cart: "ตรวจสอบตะกร้า",
+  payment: "ชำระเงิน",
+  success: "เสร็จสิ้น",
 };
 
 interface PosAppProps {
@@ -126,6 +125,7 @@ interface PosAppProps {
 
 export function PosApp({ staffName }: PosAppProps) {
   const [state, dispatch] = useReducer(posReducer, initialState);
+  const [isMemberModalOpen, setMemberModalOpen] = useState(false);
 
   useEffect(() => {
     async function prefetch() {
@@ -143,7 +143,7 @@ export function PosApp({ staffName }: PosAppProps) {
   }, []);
 
   function handleCancel() {
-    if (state.step === "member" || state.step === "success") {
+    if (state.step === "service" || state.step === "success") {
       dispatch({ type: "RESET" });
       return;
     }
@@ -153,13 +153,24 @@ export function PosApp({ staffName }: PosAppProps) {
 
   return (
     <div className="flex h-dvh flex-col bg-background">
-      <header className="flex items-center justify-between border-border border-b px-4 py-3">
+      <header className="flex items-center justify-between gap-2 border-border border-b px-4 py-3">
         <div>
           <p className="font-medium text-sm">{STEP_LABELS[state.step]}</p>
           <p className="text-muted text-xs">{staffName}</p>
         </div>
         <div className="flex items-center gap-2">
-          {state.step !== "member" && state.step !== "success" && (
+          {state.step !== "success" && (
+            <Button
+              type="button"
+              variant={state.member ? "secondary" : "ghost"}
+              size="sm"
+              onPress={() => setMemberModalOpen(true)}
+            >
+              <User className="size-4" />
+              {state.member ? state.member.name : "ระบุลูกค้า"}
+            </Button>
+          )}
+          {state.step !== "service" && state.step !== "success" && (
             <Button type="button" variant="ghost" size="sm" onPress={handleCancel}>
               ยกเลิกรายการ
             </Button>
@@ -171,18 +182,6 @@ export function PosApp({ staffName }: PosAppProps) {
       </header>
 
       <main className="flex flex-1 flex-col overflow-y-auto p-4">
-        {state.step === "member" && (
-          <MemberStep
-            onSelectMember={(member) => {
-              dispatch({ type: "SET_MEMBER", member });
-              dispatch({ type: "SET_STEP", step: "service" });
-            }}
-            onSkip={() => {
-              dispatch({ type: "SET_MEMBER", member: null });
-              dispatch({ type: "SET_STEP", step: "service" });
-            }}
-          />
-        )}
         {state.step === "service" && (
           <ServiceStep
             categories={state.categories}
@@ -190,7 +189,6 @@ export function PosApp({ staffName }: PosAppProps) {
             onAddService={(service) =>
               dispatch({ type: "ADD_SERVICE", serviceId: service.id, name: service.name, price: service.price })
             }
-            onBack={() => dispatch({ type: "SET_STEP", step: "member" })}
             onViewCart={() => dispatch({ type: "SET_STEP", step: "cart" })}
           />
         )}
@@ -216,9 +214,10 @@ export function PosApp({ staffName }: PosAppProps) {
             onSetPointsUsed={(value) => dispatch({ type: "SET_POINTS_USED", value })}
             onSetPaymentMethod={(method) => dispatch({ type: "SET_PAYMENT_METHOD", method })}
             onBack={() => dispatch({ type: "SET_STEP", step: "cart" })}
+            onSelectMember={() => setMemberModalOpen(true)}
             onBounceToMember={() => {
               dispatch({ type: "SET_MEMBER", member: null });
-              dispatch({ type: "SET_STEP", step: "member" });
+              setMemberModalOpen(true);
             }}
             onSuccess={(bill) => dispatch({ type: "SET_BILL", bill })}
           />
@@ -235,6 +234,30 @@ export function PosApp({ staffName }: PosAppProps) {
           />
         )}
       </main>
+
+      <Modal isOpen={isMemberModalOpen} onOpenChange={setMemberModalOpen}>
+        <Modal.Backdrop>
+          <Modal.Container size="md">
+            <Modal.Dialog>
+              <Modal.Header>
+                <Modal.Heading>ระบุลูกค้า</Modal.Heading>
+              </Modal.Header>
+              <Modal.Body>
+                <MemberStep
+                  onSelectMember={(member) => {
+                    dispatch({ type: "SET_MEMBER", member });
+                    setMemberModalOpen(false);
+                  }}
+                  onSkip={() => {
+                    dispatch({ type: "SET_MEMBER", member: null });
+                    setMemberModalOpen(false);
+                  }}
+                />
+              </Modal.Body>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
     </div>
   );
 }

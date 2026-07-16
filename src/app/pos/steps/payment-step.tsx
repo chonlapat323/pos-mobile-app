@@ -24,6 +24,7 @@ interface PaymentStepProps {
   onSetPointsUsed: (value: number) => void;
   onSetPaymentMethod: (method: PaymentMethod) => void;
   onBack: () => void;
+  onSelectMember: () => void;
   onBounceToMember: () => void;
   onSuccess: (bill: Bill) => void;
 }
@@ -39,6 +40,7 @@ export function PaymentStep({
   onSetPointsUsed,
   onSetPaymentMethod,
   onBack,
+  onSelectMember,
   onBounceToMember,
   onSuccess,
 }: PaymentStepProps) {
@@ -111,7 +113,7 @@ export function PaymentStep({
         <Input type="number" min={0} placeholder="0" />
       </TextField>
 
-      {member && (
+      {member ? (
         <TextField
           value={pointsUsed === 0 ? "" : String(pointsUsed)}
           onChange={(value) => onSetPointsUsed(Math.max(0, Math.min(maxPointsUsable, Number(value) || 0)))}
@@ -120,6 +122,13 @@ export function PaymentStep({
           <Label>ใช้ point แทนส่วนลด (มี {member.pointBalance.toLocaleString("th-TH")} point)</Label>
           <Input type="number" min={0} max={maxPointsUsable} placeholder="0" />
         </TextField>
+      ) : (
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-border border-dashed p-3">
+          <p className="text-muted text-sm">ไม่ได้ระบุลูกค้า — จะไม่ได้สะสม point</p>
+          <Button type="button" variant="secondary" size="sm" onPress={onSelectMember}>
+            ระบุลูกค้า
+          </Button>
+        </div>
       )}
 
       <div className="flex flex-col gap-1 rounded-lg border border-border p-4">

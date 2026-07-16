@@ -14,11 +14,10 @@ interface ServiceStepProps {
   categories: Category[];
   cartCount: number;
   onAddService: (service: { id: string; name: string; price: number }) => void;
-  onBack: () => void;
   onViewCart: () => void;
 }
 
-export function ServiceStep({ categories, cartCount, onAddService, onBack, onViewCart }: ServiceStepProps) {
+export function ServiceStep({ categories, cartCount, onAddService, onViewCart }: ServiceStepProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(false);
@@ -61,10 +60,7 @@ export function ServiceStep({ categories, cartCount, onAddService, onBack, onVie
           />
         )}
       </div>
-      <div className="flex items-center justify-between gap-3 border-border border-t pt-3">
-        <Button type="button" variant="secondary" onPress={onBack}>
-          ย้อนกลับ
-        </Button>
+      <div className="flex items-center justify-end gap-3 border-border border-t pt-3">
         <Button type="button" onPress={onViewCart}>
           <ShoppingCart className="size-4" />
           ตรวจสอบตะกร้า ({cartCount})
