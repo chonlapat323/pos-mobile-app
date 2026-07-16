@@ -1,9 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Clock, ImageIcon } from "lucide-react";
+import { Clock } from "lucide-react";
 
-import { tintGradient } from "@/lib/palette";
+import { mockPhotoUrl } from "@/lib/palette";
 
 import type { Service } from "../types";
 
@@ -27,16 +27,9 @@ export function ServiceGrid({ services, onAdd }: ServiceGridProps) {
           whileTap={{ scale: 0.96 }}
           className="flex flex-col overflow-hidden rounded-2xl border border-border bg-surface text-left shadow-xs"
         >
-          <div
-            className="relative flex aspect-video items-center justify-center overflow-hidden"
-            style={service.imageUrl ? undefined : { background: tintGradient(service.id) }}
-          >
-            {service.imageUrl ? (
-              // biome-ignore lint/performance/noImgElement: local dev image server, next/image remote-pattern config not worth it yet
-              <img src={service.imageUrl} alt="" className="size-full object-cover" />
-            ) : (
-              <ImageIcon className="size-6 text-white/30" strokeWidth={1.5} />
-            )}
+          <div className="relative flex aspect-video items-center justify-center overflow-hidden bg-default">
+            {/* biome-ignore lint/performance/noImgElement: local dev image server, next/image remote-pattern config not worth it yet */}
+            <img src={service.imageUrl || mockPhotoUrl(service.id)} alt="" className="size-full object-cover" />
             {service.status === "PROMOTION" && (
               <span className="absolute top-2 left-2 rounded-full bg-accent px-2 py-0.5 font-bold text-[10px] text-accent-foreground tracking-wide">
                 PROMO

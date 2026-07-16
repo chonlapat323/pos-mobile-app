@@ -1,8 +1,6 @@
 "use client";
 
-import { Tag } from "lucide-react";
-
-import { tintGradient } from "@/lib/palette";
+import { mockPhotoUrl } from "@/lib/palette";
 import { cn } from "@/lib/utils";
 
 import type { Category } from "../types";
@@ -30,17 +28,16 @@ export function CategoryTabs({ categories, selectedId, onSelect }: CategoryTabsP
           >
             <div
               className={cn(
-                "flex size-16 items-center justify-center overflow-hidden rounded-xl",
+                "flex size-16 items-center justify-center overflow-hidden rounded-xl bg-default",
                 isSelected && "ring-2 ring-accent",
               )}
-              style={category.imageUrl ? undefined : { background: tintGradient(category.id) }}
             >
-              {category.imageUrl ? (
-                // biome-ignore lint/performance/noImgElement: local dev image server, next/image remote-pattern config not worth it yet
-                <img src={category.imageUrl} alt="" className="size-full object-cover" />
-              ) : (
-                <Tag className={cn("size-6", isSelected ? "text-white" : "text-white/70")} strokeWidth={1.8} />
-              )}
+              {/* biome-ignore lint/performance/noImgElement: local dev image server, next/image remote-pattern config not worth it yet */}
+              <img
+                src={category.imageUrl || mockPhotoUrl(category.id, 120, 120)}
+                alt=""
+                className="size-full object-cover"
+              />
             </div>
             <span className={cn("max-w-20 truncate font-medium text-xs", isSelected && "text-accent")}>
               {category.name}
