@@ -10,6 +10,7 @@ export interface Member {
 export interface Category {
   id: string;
   name: string;
+  imageUrl: string | null;
 }
 
 export interface Service {
