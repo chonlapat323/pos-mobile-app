@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@heroui/react";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Printer } from "lucide-react";
 
 import type { Bill, CartLine, Member } from "../types";
 
@@ -51,7 +51,7 @@ export function SuccessStep({
         <p className="font-semibold text-xl">ชำระเงินสำเร็จ</p>
       </div>
 
-      <div className="flex flex-col gap-3 rounded-lg border border-border p-4 font-mono text-sm">
+      <div className="print-receipt flex flex-col gap-3 rounded-lg border border-border p-4 font-mono text-sm">
         <div className="flex flex-col items-center gap-0.5 text-center">
           <p className="font-semibold">ใบเสร็จรับเงิน</p>
           <p className="text-muted text-xs">เลขที่ {bill.id.slice(-8).toUpperCase()}</p>
@@ -133,9 +133,15 @@ export function SuccessStep({
         <p className="text-center text-muted text-xs">ขอบคุณที่ใช้บริการ</p>
       </div>
 
-      <Button type="button" size="lg" fullWidth onPress={onNewTransaction}>
-        เริ่มรายการใหม่
-      </Button>
+      <div className="flex items-center gap-3">
+        <Button type="button" variant="secondary" size="lg" onPress={() => window.print()}>
+          <Printer className="size-4" />
+          พิมพ์ใบเสร็จ
+        </Button>
+        <Button type="button" size="lg" fullWidth onPress={onNewTransaction}>
+          เริ่มรายการใหม่
+        </Button>
+      </div>
     </div>
   );
 }
