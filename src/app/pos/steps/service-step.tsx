@@ -4,11 +4,14 @@ import { useEffect, useRef, useState } from "react";
 
 import { toast } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
+import { ImageIcon } from "lucide-react";
+
+import { tintGradient } from "@/lib/palette";
 
 import { getServicesByCategory } from "../actions";
 import type { Category, Service } from "../types";
 import { CategoryTabs } from "./category-tabs";
-import { mockPhotoUrl, ServiceGrid } from "./service-grid";
+import { ServiceGrid } from "./service-grid";
 
 interface FlyingItem {
   id: number;
@@ -16,7 +19,8 @@ interface FlyingItem {
   fromY: number;
   deltaX: number;
   deltaY: number;
-  imageUrl: string;
+  serviceId: string;
+  imageUrl: string | null;
 }
 
 const FLY_SIZE = 40;
@@ -80,7 +84,8 @@ export function ServiceStep({ categories, onAddService }: ServiceStepProps) {
         fromY,
         deltaX: toX - fromX,
         deltaY: toY - fromY,
-        imageUrl: service.imageUrl ?? mockPhotoUrl(service.id),
+        serviceId: service.id,
+        imageUrl: service.imageUrl,
       },
     ]);
   }
@@ -107,11 +112,22 @@ export function ServiceStep({ categories, onAddService }: ServiceStepProps) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5, ease: [0.4, 0, 0.7, 1] }}
             onAnimationComplete={() => setFlyingItems((prev) => prev.filter((f) => f.id !== item.id))}
-            style={{ position: "fixed", left: item.fromX, top: item.fromY, width: FLY_SIZE, height: FLY_SIZE }}
-            className="pointer-events-none z-50 overflow-hidden rounded-full border border-border bg-surface shadow-lg"
+            style={{
+              position: "fixed",
+              left: item.fromX,
+              top: item.fromY,
+              width: FLY_SIZE,
+              height: FLY_SIZE,
+              background: item.imageUrl ? undefined : tintGradient(item.serviceId),
+            }}
+            className="pointer-events-none z-50 flex items-center justify-center overflow-hidden rounded-full border border-border bg-surface shadow-lg"
           >
-            {/* biome-ignore lint/performance/noImgElement: local dev image server, next/image remote-pattern config not worth it yet */}
-            <img src={item.imageUrl} alt="" className="size-full object-cover" />
+            {item.imageUrl ? (
+              // biome-ignore lint/performance/noImgElement: local dev image server, next/image remote-pattern config not worth it yet
+              <img src={item.imageUrl} alt="" className="size-full object-cover" />
+            ) : (
+              <ImageIcon className="size-4 text-white/40" strokeWidth={1.5} />
+            )}
           </motion.div>
         ))}
       </AnimatePresence>

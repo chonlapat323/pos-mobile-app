@@ -107,7 +107,7 @@ export function CartRail({
             onClick={onSelectMember}
             className="flex w-full items-center gap-3 rounded-2xl border border-accent/30 bg-accent-soft p-3 text-left"
           >
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent font-bold text-accent-foreground text-base">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(140deg,var(--accent),#8f7440)] font-bold text-accent-foreground text-base">
               {member.name.charAt(0)}
             </span>
             <span className="min-w-0 flex-1">

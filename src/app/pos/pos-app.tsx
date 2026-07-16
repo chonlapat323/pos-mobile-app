@@ -146,7 +146,7 @@ export function PosApp({ staffName }: PosAppProps) {
               className="size-10 shrink-0 rounded-xl border border-border object-cover"
             />
           ) : (
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[linear-gradient(140deg,var(--accent),#8f7440)]">
               <Sparkle className="size-4.5 text-accent-foreground" />
             </div>
           )}
