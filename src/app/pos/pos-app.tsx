@@ -3,7 +3,7 @@
 import { useEffect, useReducer, useState } from "react";
 
 import { Button, Modal, toast } from "@heroui/react";
-import { LogOut, User } from "lucide-react";
+import { LogOut, Store, User } from "lucide-react";
 
 import { logout } from "@/lib/auth";
 
@@ -13,7 +13,7 @@ import { MemberStep } from "./steps/member-step";
 import { PaymentStep } from "./steps/payment-step";
 import { ServiceStep } from "./steps/service-step";
 import { SuccessStep } from "./steps/success-step";
-import type { Bill, CartLine, Category, Member, PaymentMethod } from "./types";
+import type { Bill, CartLine, Category, Member, PaymentMethod, Shop } from "./types";
 
 type Step = "service" | "cart" | "payment" | "success";
 
@@ -26,7 +26,7 @@ interface PosState {
   paymentMethod: PaymentMethod | null;
   lastBill: Bill | null;
   categories: Category[];
-  bahtPerPoint: number;
+  shop: Shop | null;
 }
 
 type PosAction =
@@ -40,7 +40,7 @@ type PosAction =
   | { type: "SET_POINTS_USED"; value: number }
   | { type: "SET_PAYMENT_METHOD"; method: PaymentMethod }
   | { type: "SET_CATEGORIES"; categories: Category[] }
-  | { type: "SET_BAHT_PER_POINT"; value: number }
+  | { type: "SET_SHOP"; shop: Shop }
   | { type: "SET_BILL"; bill: Bill }
   | { type: "RESET" };
 
@@ -53,7 +53,7 @@ const initialState: PosState = {
   paymentMethod: null,
   lastBill: null,
   categories: [],
-  bahtPerPoint: 50,
+  shop: null,
 };
 
 function posReducer(state: PosState, action: PosAction): PosState {
@@ -101,12 +101,12 @@ function posReducer(state: PosState, action: PosAction): PosState {
       return { ...state, paymentMethod: action.method };
     case "SET_CATEGORIES":
       return { ...state, categories: action.categories };
-    case "SET_BAHT_PER_POINT":
-      return { ...state, bahtPerPoint: action.value };
+    case "SET_SHOP":
+      return { ...state, shop: action.shop };
     case "SET_BILL":
       return { ...state, lastBill: action.bill, step: "success" };
     case "RESET":
-      return { ...initialState, categories: state.categories, bahtPerPoint: state.bahtPerPoint };
+      return { ...initialState, categories: state.categories, shop: state.shop };
     default:
       return state;
   }
@@ -136,7 +136,9 @@ export function PosApp({ staffName }: PosAppProps) {
         toast.danger(categoriesResult.error);
       }
       if (shopResult.success) {
-        dispatch({ type: "SET_BAHT_PER_POINT", value: shopResult.data.bahtPerPoint });
+        dispatch({ type: "SET_SHOP", shop: shopResult.data });
+      } else {
+        toast.danger(shopResult.error);
       }
     }
     void prefetch();
@@ -154,9 +156,25 @@ export function PosApp({ staffName }: PosAppProps) {
   return (
     <div className="flex h-dvh flex-col bg-background">
       <header className="flex items-center justify-between gap-2 border-border border-b bg-surface px-4 py-3 shadow-xs">
-        <div>
-          <p className="font-semibold text-base">{STEP_LABELS[state.step]}</p>
-          <p className="text-muted text-xs">{staffName}</p>
+        <div className="flex items-center gap-3">
+          {state.shop?.logoUrl ? (
+            // biome-ignore lint/performance/noImgElement: local dev image server, next/image remote-pattern config not worth it yet
+            <img
+              src={state.shop.logoUrl}
+              alt=""
+              className="size-9 shrink-0 rounded-full border border-border object-cover"
+            />
+          ) : (
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-default">
+              <Store className="size-4 text-muted" />
+            </div>
+          )}
+          <div>
+            <p className="font-semibold text-base">{state.shop?.name ?? STEP_LABELS[state.step]}</p>
+            <p className="text-muted text-xs">
+              {state.shop ? `${STEP_LABELS[state.step]} · ${staffName}` : staffName}
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           {state.step !== "success" && (
@@ -210,7 +228,7 @@ export function PosApp({ staffName }: PosAppProps) {
             discount={state.discount}
             pointsUsed={state.pointsUsed}
             paymentMethod={state.paymentMethod}
-            bahtPerPoint={state.bahtPerPoint}
+            bahtPerPoint={state.shop?.bahtPerPoint ?? 50}
             onSetDiscount={(value) => dispatch({ type: "SET_DISCOUNT", value })}
             onSetPointsUsed={(value) => dispatch({ type: "SET_POINTS_USED", value })}
             onSetPaymentMethod={(method) => dispatch({ type: "SET_PAYMENT_METHOD", method })}
@@ -229,7 +247,7 @@ export function PosApp({ staffName }: PosAppProps) {
             member={state.member}
             cart={state.cart}
             pointsUsed={state.pointsUsed}
-            bahtPerPoint={state.bahtPerPoint}
+            bahtPerPoint={state.shop?.bahtPerPoint ?? 50}
             staffName={staffName}
             onNewTransaction={() => dispatch({ type: "RESET" })}
           />

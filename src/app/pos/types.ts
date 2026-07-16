@@ -42,5 +42,7 @@ export interface Bill {
 }
 
 export interface Shop {
+  name: string;
+  logoUrl: string | null;
   bahtPerPoint: number;
 }
