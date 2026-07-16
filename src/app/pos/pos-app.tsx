@@ -3,11 +3,12 @@
 import { useEffect, useReducer, useState } from "react";
 
 import { Button, Modal, toast } from "@heroui/react";
-import { LogOut, Store, User } from "lucide-react";
+import { History, LogOut, Store, User } from "lucide-react";
 
 import { logout } from "@/lib/auth";
 
 import { getCategories, getShopConfig } from "./actions";
+import { BillHistoryModal } from "./steps/bill-history-modal";
 import { CartStep } from "./steps/cart-step";
 import { MemberStep } from "./steps/member-step";
 import { PaymentStep } from "./steps/payment-step";
@@ -126,6 +127,7 @@ interface PosAppProps {
 export function PosApp({ staffName }: PosAppProps) {
   const [state, dispatch] = useReducer(posReducer, initialState);
   const [isMemberModalOpen, setMemberModalOpen] = useState(false);
+  const [isHistoryOpen, setHistoryOpen] = useState(false);
 
   useEffect(() => {
     async function prefetch() {
@@ -194,6 +196,9 @@ export function PosApp({ staffName }: PosAppProps) {
               ยกเลิกรายการ
             </Button>
           )}
+          <Button type="button" variant="ghost" size="sm" isIconOnly onPress={() => setHistoryOpen(true)}>
+            <History className="size-4" />
+          </Button>
           <Button type="button" variant="ghost" size="sm" isIconOnly onPress={() => void logout()}>
             <LogOut className="size-4" />
           </Button>
@@ -273,6 +278,21 @@ export function PosApp({ staffName }: PosAppProps) {
                     setMemberModalOpen(false);
                   }}
                 />
+              </Modal.Body>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
+
+      <Modal isOpen={isHistoryOpen} onOpenChange={setHistoryOpen}>
+        <Modal.Backdrop>
+          <Modal.Container size="lg">
+            <Modal.Dialog>
+              <Modal.Header>
+                <Modal.Heading>ประวัติการขาย</Modal.Heading>
+              </Modal.Header>
+              <Modal.Body>
+                <BillHistoryModal shopName={state.shop?.name ?? ""} bahtPerPoint={state.shop?.bahtPerPoint ?? 50} />
               </Modal.Body>
             </Modal.Dialog>
           </Modal.Container>

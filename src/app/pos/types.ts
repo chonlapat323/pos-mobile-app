@@ -47,3 +47,17 @@ export interface Shop {
   logoUrl: string | null;
   bahtPerPoint: number;
 }
+
+export interface BillHistoryItem {
+  id: string;
+  createdAt: string;
+  subtotal: string;
+  discount: string;
+  total: string;
+  paymentMethod: PaymentMethod | null;
+  pointEarned: number;
+  pointUsed: number;
+  member: { id: string; name: string; phone: string } | null;
+  staff: { id: string; name: string };
+  items: { id: string; quantity: number; priceAtSale: string; service: { id: string; name: string } }[];
+}

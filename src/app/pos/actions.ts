@@ -2,7 +2,7 @@
 
 import { ApiError, apiFetch, type PaginatedResult } from "@/lib/api";
 
-import type { Bill, Category, Member, PaymentMethod, Service, Shop } from "./types";
+import type { Bill, BillHistoryItem, Category, Member, PaymentMethod, Service, Shop } from "./types";
 
 type MembersResult = { success: true; data: Member[] } | { success: false; error: string };
 type MemberResult = { success: true; data: Member } | { success: false; error: string };
@@ -10,6 +10,7 @@ type CategoriesResult = { success: true; data: Category[] } | { success: false; 
 type ServicesResult = { success: true; data: Service[] } | { success: false; error: string };
 type ShopResult = { success: true; data: Shop } | { success: false; error: string };
 type BillResult = { success: true; data: Bill } | { success: false; error: string };
+type BillsResult = { success: true; data: PaginatedResult<BillHistoryItem> } | { success: false; error: string };
 
 export async function searchMembers(search: string): Promise<MembersResult> {
   try {
@@ -55,6 +56,26 @@ export async function getShopConfig(): Promise<ShopResult> {
     return { success: true, data };
   } catch (error) {
     return { success: false, error: error instanceof ApiError ? error.message : "โหลดข้อมูลร้านไม่สำเร็จ" };
+  }
+}
+
+export async function getBills(params: {
+  dateFrom?: string;
+  dateTo?: string;
+  search?: string;
+  page?: number;
+}): Promise<BillsResult> {
+  try {
+    const query = new URLSearchParams();
+    if (params.dateFrom) query.set("dateFrom", params.dateFrom);
+    if (params.dateTo) query.set("dateTo", params.dateTo);
+    if (params.search) query.set("search", params.search);
+    query.set("page", String(params.page ?? 1));
+    query.set("pageSize", "20");
+    const data = await apiFetch<PaginatedResult<BillHistoryItem>>(`/bills?${query.toString()}`);
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: error instanceof ApiError ? error.message : "โหลดรายการบิลไม่สำเร็จ" };
   }
 }
 
