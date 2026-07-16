@@ -56,28 +56,30 @@ export function ReceiptView({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="print-receipt flex flex-col gap-3 rounded-lg border border-border p-4 font-mono text-sm">
+      {/* Deliberately fixed cream/paper colors, not theme tokens - this should read as real receipt
+          paper regardless of the app's dark chrome around it. */}
+      <div className="print-receipt flex flex-col gap-3 rounded-2xl bg-[#f6f3ee] p-5 font-mono text-[#2a2620] text-sm">
         <div className="flex flex-col items-center gap-0.5 text-center">
-          {shopName && <p className="font-semibold text-base">{shopName}</p>}
+          {shopName && <p className="font-heading font-bold text-base">{shopName}</p>}
           <p className="font-semibold">ใบเสร็จรับเงิน</p>
-          <p className="text-muted text-xs">เลขที่ {billId.slice(-8).toUpperCase()}</p>
-          <p className="text-muted text-xs">
+          <p className="text-[#7a7266] text-xs">เลขที่ {billId.slice(-8).toUpperCase()}</p>
+          <p className="text-[#7a7266] text-xs">
             {createdAtDate.toLocaleDateString("th-TH")} {createdAtDate.toLocaleTimeString("th-TH")}
           </p>
         </div>
 
-        <div className="border-border border-t border-dashed" />
+        <div className="border-[#cdc5b8] border-t border-dashed" />
 
         <div className="flex justify-between text-xs">
-          <span className="text-muted">ลูกค้า</span>
+          <span className="text-[#7a7266]">ลูกค้า</span>
           <span>{memberName ?? "Walk-in"}</span>
         </div>
         <div className="flex justify-between text-xs">
-          <span className="text-muted">พนักงาน</span>
+          <span className="text-[#7a7266]">พนักงาน</span>
           <span>{staffName}</span>
         </div>
 
-        <div className="border-border border-t border-dashed" />
+        <div className="border-[#cdc5b8] border-t border-dashed" />
 
         <div className="flex flex-col gap-1">
           {items.map((item) => (
@@ -90,30 +92,30 @@ export function ReceiptView({
           ))}
         </div>
 
-        <div className="border-border border-t border-dashed" />
+        <div className="border-[#cdc5b8] border-t border-dashed" />
 
         <div className="flex flex-col gap-1">
           <div className="flex justify-between">
-            <span className="text-muted">ยอดรวมบริการ</span>
+            <span className="text-[#7a7266]">ยอดรวมบริการ</span>
             <span>฿{subtotal.toLocaleString("th-TH")}</span>
           </div>
           {discount > 0 && (
             <div className="flex justify-between">
-              <span className="text-muted">ส่วนลด</span>
+              <span className="text-[#7a7266]">ส่วนลด</span>
               <span>-฿{discount.toLocaleString("th-TH")}</span>
             </div>
           )}
           {pointUsed > 0 && (
             <div className="flex justify-between">
-              <span className="text-muted">ใช้ point ({pointUsed})</span>
+              <span className="text-[#7a7266]">ใช้ point ({pointUsed})</span>
               <span>-฿{pointUsedBaht.toLocaleString("th-TH")}</span>
             </div>
           )}
-          <div className="flex justify-between border-border border-t pt-1 font-semibold text-base">
+          <div className="flex justify-between border-[#ccc4b6] border-t pt-1 font-bold text-base">
             <span>ยอดชำระ</span>
             <span>฿{total.toLocaleString("th-TH")}</span>
           </div>
-          <div className="flex justify-between text-muted text-xs">
+          <div className="flex justify-between text-[#7a7266] text-xs">
             <span>ชำระโดย</span>
             <span>{paymentMethod ? (PAYMENT_METHOD_LABELS[paymentMethod] ?? paymentMethod) : "-"}</span>
           </div>
@@ -121,15 +123,15 @@ export function ReceiptView({
 
         {memberName !== null && (
           <>
-            <div className="border-border border-t border-dashed" />
+            <div className="border-[#cdc5b8] border-t border-dashed" />
             <div className="flex flex-col gap-1">
-              <div className="flex justify-between font-medium text-accent">
+              <div className="flex justify-between font-semibold text-[#8a6d2f]">
                 <span>Point ที่ได้รับ</span>
                 <span>+{pointEarned}</span>
               </div>
               {pointBalanceAfter !== null && (
                 <div className="flex justify-between">
-                  <span className="text-muted">Point คงเหลือ</span>
+                  <span className="text-[#7a7266]">Point คงเหลือ</span>
                   <span>{pointBalanceAfter.toLocaleString("th-TH")}</span>
                 </div>
               )}
@@ -137,8 +139,8 @@ export function ReceiptView({
           </>
         )}
 
-        <div className="border-border border-t border-dashed" />
-        <p className="text-center text-muted text-xs">ขอบคุณที่ใช้บริการ</p>
+        <div className="border-[#cdc5b8] border-t border-dashed" />
+        <p className="text-center text-[#7a7266] text-xs">ขอบคุณที่ใช้บริการ</p>
       </div>
 
       <Button type="button" variant="secondary" size="lg" onPress={() => window.print()}>

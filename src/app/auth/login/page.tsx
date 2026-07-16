@@ -1,14 +1,23 @@
+import { Sparkle } from "lucide-react";
+
 import { LoginForm } from "./login-form";
 
 export default function LoginPage() {
   return (
     <div className="flex h-dvh w-full items-center justify-center bg-background p-8">
-      <div className="w-full max-w-sm space-y-8">
-        <div className="space-y-2 text-center">
-          <h1 className="font-medium text-2xl tracking-tight">POS Services — หน้าร้าน</h1>
-          <p className="text-muted">เข้าสู่ระบบสำหรับพนักงาน</p>
+      <div className="w-full max-w-sm space-y-7">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <div className="flex size-14 items-center justify-center rounded-2xl bg-accent shadow-lg">
+            <Sparkle className="size-6 text-accent-foreground" />
+          </div>
+          <div>
+            <h1 className="font-heading font-semibold text-2xl tracking-tight">POS Services</h1>
+            <p className="mt-1 text-muted text-sm">ระบบขายบริการ · เข้าสู่ระบบพนักงาน</p>
+          </div>
         </div>
-        <LoginForm />
+        <div className="rounded-2xl border border-border bg-surface p-6 shadow-lg">
+          <LoginForm />
+        </div>
       </div>
     </div>
   );

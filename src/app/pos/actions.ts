@@ -41,10 +41,12 @@ export async function getCategories(): Promise<CategoriesResult> {
 
 export async function getServicesByCategory(categoryId: string): Promise<ServicesResult> {
   try {
+    // No status filter here on purpose - PROMOTION services should still be sellable (and shown
+    // with a badge), so only INACTIVE is excluded, done client-side after fetching everything.
     const result = await apiFetch<PaginatedResult<Service>>(
-      `/services?categoryId=${encodeURIComponent(categoryId)}&status=ACTIVE&pageSize=100`,
+      `/services?categoryId=${encodeURIComponent(categoryId)}&pageSize=100`,
     );
-    return { success: true, data: result.data };
+    return { success: true, data: result.data.filter((service) => service.status !== "INACTIVE") };
   } catch (error) {
     return { success: false, error: error instanceof ApiError ? error.message : "โหลดบริการไม่สำเร็จ" };
   }

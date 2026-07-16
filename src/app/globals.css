@@ -1,11 +1,23 @@
 @import "@heroui/styles";
 
+@theme {
+  --font-sans: var(--font-anuphan);
+  --font-heading: var(--font-noto-serif-thai);
+}
+
+/* Warm gold accent (unlayered, so it always wins over HeroUI's @layer base defaults regardless of
+   selector/order) - this app is a fixed dark kiosk theme, no light/dark toggle. */
+:root {
+  --accent: #c9a86a;
+  --accent-foreground: #1a1712;
+}
+
 html {
   overscroll-behavior: none;
 }
 
 body {
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
 @media print {

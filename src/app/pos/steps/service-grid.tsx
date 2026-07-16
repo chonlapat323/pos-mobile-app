@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ImageOff } from "lucide-react";
+import { Clock, ImageOff } from "lucide-react";
 
 import type { Service } from "../types";
 
@@ -22,20 +22,34 @@ export function ServiceGrid({ services, onAdd }: ServiceGridProps) {
           key={service.id}
           type="button"
           onClick={(e) => onAdd(service, e.currentTarget)}
-          whileTap={{ scale: 0.92 }}
-          className="flex flex-col gap-2 rounded-xl border border-border bg-surface p-3 text-left shadow-xs"
+          whileTap={{ scale: 0.96 }}
+          className="flex flex-col overflow-hidden rounded-2xl border border-border bg-surface text-left shadow-xs"
         >
-          <div className="flex aspect-video items-center justify-center overflow-hidden rounded-lg bg-default">
+          <div className="relative flex aspect-video items-center justify-center overflow-hidden bg-default">
             {service.imageUrl ? (
               // biome-ignore lint/performance/noImgElement: local dev image server, next/image remote-pattern config not worth it yet
               <img src={service.imageUrl} alt="" className="size-full object-cover" />
             ) : (
               <ImageOff className="size-5 text-muted" />
             )}
+            {service.status === "PROMOTION" && (
+              <span className="absolute top-2 left-2 rounded-full bg-accent px-2 py-0.5 font-bold text-[10px] text-accent-foreground tracking-wide">
+                PROMO
+              </span>
+            )}
           </div>
-          <div>
-            <p className="font-medium text-sm">{service.name}</p>
-            <p className="font-medium text-accent text-sm">฿{Number(service.price).toLocaleString("th-TH")}</p>
+          <div className="flex flex-col gap-1.5 p-3">
+            <p className="font-medium text-sm leading-tight">{service.name}</p>
+            {service.description && (
+              <p className="line-clamp-1 text-muted text-xs leading-tight">{service.description}</p>
+            )}
+            <div className="mt-0.5 flex items-center justify-between">
+              <span className="flex items-center gap-1 text-[11px] text-muted">
+                <Clock className="size-3" />
+                {service.durationMinutes} นาที
+              </span>
+              <span className="font-bold text-accent text-sm">฿{Number(service.price).toLocaleString("th-TH")}</span>
+            </div>
           </div>
         </motion.button>
       ))}

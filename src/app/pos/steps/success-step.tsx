@@ -42,9 +42,11 @@ export function SuccessStep({
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4">
-      <div className="flex flex-col items-center gap-2 text-center">
-        <CheckCircle2 className="size-12 text-success" />
-        <p className="font-semibold text-xl">ชำระเงินสำเร็จ</p>
+      <div className="flex flex-col items-center gap-3 text-center">
+        <div className="flex size-14 items-center justify-center rounded-full bg-success-soft">
+          <CheckCircle2 className="size-7 text-success" />
+        </div>
+        <p className="font-heading font-semibold text-xl">ชำระเงินสำเร็จ</p>
       </div>
 
       <ReceiptView

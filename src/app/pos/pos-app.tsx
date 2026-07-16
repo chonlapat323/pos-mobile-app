@@ -3,23 +3,19 @@
 import { useEffect, useReducer, useState } from "react";
 
 import { Button, Modal, toast } from "@heroui/react";
-import { History, LogOut, Store, User } from "lucide-react";
+import { History, LogOut, Sparkle, User } from "lucide-react";
 
 import { logout } from "@/lib/auth";
 
 import { getCategories, getShopConfig } from "./actions";
 import { BillHistoryModal } from "./steps/bill-history-modal";
-import { CartStep } from "./steps/cart-step";
+import { CartRail } from "./steps/cart-rail";
 import { MemberStep } from "./steps/member-step";
-import { PaymentStep } from "./steps/payment-step";
 import { ServiceStep } from "./steps/service-step";
 import { SuccessStep } from "./steps/success-step";
 import type { Bill, CartLine, Category, Member, PaymentMethod, Shop } from "./types";
 
-type Step = "service" | "cart" | "payment" | "success";
-
 interface PosState {
-  step: Step;
   member: Member | null;
   cart: CartLine[];
   discount: number;
@@ -31,12 +27,12 @@ interface PosState {
 }
 
 type PosAction =
-  | { type: "SET_STEP"; step: Step }
   | { type: "SET_MEMBER"; member: Member | null }
   | { type: "ADD_SERVICE"; serviceId: string; name: string; price: number }
   | { type: "INCREMENT_LINE"; serviceId: string }
   | { type: "DECREMENT_LINE"; serviceId: string }
   | { type: "REMOVE_LINE"; serviceId: string }
+  | { type: "CLEAR_CART" }
   | { type: "SET_DISCOUNT"; value: number }
   | { type: "SET_POINTS_USED"; value: number }
   | { type: "SET_PAYMENT_METHOD"; method: PaymentMethod }
@@ -46,7 +42,6 @@ type PosAction =
   | { type: "RESET" };
 
 const initialState: PosState = {
-  step: "service",
   member: null,
   cart: [],
   discount: 0,
@@ -59,8 +54,6 @@ const initialState: PosState = {
 
 function posReducer(state: PosState, action: PosAction): PosState {
   switch (action.type) {
-    case "SET_STEP":
-      return { ...state, step: action.step };
     case "SET_MEMBER":
       return { ...state, member: action.member, pointsUsed: 0 };
     case "ADD_SERVICE": {
@@ -94,6 +87,8 @@ function posReducer(state: PosState, action: PosAction): PosState {
       };
     case "REMOVE_LINE":
       return { ...state, cart: state.cart.filter((line) => line.serviceId !== action.serviceId) };
+    case "CLEAR_CART":
+      return { ...state, cart: [], discount: 0, pointsUsed: 0, paymentMethod: "CASH" };
     case "SET_DISCOUNT":
       return { ...state, discount: action.value };
     case "SET_POINTS_USED":
@@ -105,20 +100,13 @@ function posReducer(state: PosState, action: PosAction): PosState {
     case "SET_SHOP":
       return { ...state, shop: action.shop };
     case "SET_BILL":
-      return { ...state, lastBill: action.bill, step: "success" };
+      return { ...state, lastBill: action.bill };
     case "RESET":
       return { ...initialState, categories: state.categories, shop: state.shop };
     default:
       return state;
   }
 }
-
-const STEP_LABELS: Record<Step, string> = {
-  service: "เลือกบริการ",
-  cart: "ตรวจสอบตะกร้า",
-  payment: "ชำระเงิน",
-  success: "เสร็จสิ้น",
-};
 
 interface PosAppProps {
   staffName: string;
@@ -146,56 +134,40 @@ export function PosApp({ staffName }: PosAppProps) {
     void prefetch();
   }, []);
 
-  function handleCancel() {
-    if (state.step === "service" || state.step === "success") {
-      dispatch({ type: "RESET" });
-      return;
-    }
-    if (!confirm("ยกเลิกรายการนี้และเริ่มใหม่?")) return;
-    dispatch({ type: "RESET" });
-  }
-
   return (
     <div className="flex h-dvh flex-col bg-background">
-      <header className="flex items-center justify-between gap-2 border-border border-b bg-surface px-4 py-3 shadow-xs">
+      <header className="flex items-center justify-between gap-2 border-border border-b bg-surface px-5 py-3 shadow-xs">
         <div className="flex items-center gap-3">
           {state.shop?.logoUrl ? (
             // biome-ignore lint/performance/noImgElement: local dev image server, next/image remote-pattern config not worth it yet
             <img
               src={state.shop.logoUrl}
               alt=""
-              className="size-9 shrink-0 rounded-full border border-border object-cover"
+              className="size-10 shrink-0 rounded-xl border border-border object-cover"
             />
           ) : (
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-default">
-              <Store className="size-4 text-muted" />
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent">
+              <Sparkle className="size-4.5 text-accent-foreground" />
             </div>
           )}
           <div>
-            <p className="font-semibold text-base">{state.shop?.name ?? STEP_LABELS[state.step]}</p>
-            <p className="text-muted text-xs">
-              {state.shop ? `${STEP_LABELS[state.step]} · ${staffName}` : staffName}
+            <p className="font-heading font-semibold text-base leading-tight">
+              {state.shop?.name ?? "POS Services"}
             </p>
+            <p className="text-muted text-xs">เลือกบริการ · {staffName}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {state.step !== "success" && (
-            <Button
-              type="button"
-              variant={state.member ? "secondary" : "outline"}
-              size="sm"
-              className="!rounded-full"
-              onPress={() => setMemberModalOpen(true)}
-            >
-              <User className="size-4" />
-              {state.member ? state.member.name : "ระบุลูกค้า"}
-            </Button>
-          )}
-          {state.step !== "service" && state.step !== "success" && (
-            <Button type="button" variant="ghost" size="sm" onPress={handleCancel}>
-              ยกเลิกรายการ
-            </Button>
-          )}
+          <Button
+            type="button"
+            variant={state.member ? "secondary" : "outline"}
+            size="sm"
+            className="!rounded-full"
+            onPress={() => setMemberModalOpen(true)}
+          >
+            <User className="size-4" />
+            {state.member ? state.member.name.split(" ")[0] : "ระบุลูกค้า"}
+          </Button>
           <Button type="button" variant="ghost" size="sm" isIconOnly onPress={() => setHistoryOpen(true)}>
             <History className="size-4" />
           </Button>
@@ -205,60 +177,35 @@ export function PosApp({ staffName }: PosAppProps) {
         </div>
       </header>
 
-      <main className="flex flex-1 flex-col overflow-y-auto p-4">
-        {state.step === "service" && (
-          <ServiceStep
-            categories={state.categories}
-            cartCount={state.cart.reduce((sum, line) => sum + line.quantity, 0)}
-            onAddService={(service) =>
-              dispatch({ type: "ADD_SERVICE", serviceId: service.id, name: service.name, price: service.price })
-            }
-            onViewCart={() => dispatch({ type: "SET_STEP", step: "cart" })}
-          />
-        )}
-        {state.step === "cart" && (
-          <CartStep
-            cart={state.cart}
-            onIncrement={(serviceId) => dispatch({ type: "INCREMENT_LINE", serviceId })}
-            onDecrement={(serviceId) => dispatch({ type: "DECREMENT_LINE", serviceId })}
-            onRemove={(serviceId) => dispatch({ type: "REMOVE_LINE", serviceId })}
-            onBack={() => dispatch({ type: "SET_STEP", step: "service" })}
-            onProceed={() => dispatch({ type: "SET_STEP", step: "payment" })}
-          />
-        )}
-        {state.step === "payment" && (
-          <PaymentStep
-            member={state.member}
-            cart={state.cart}
-            discount={state.discount}
-            pointsUsed={state.pointsUsed}
-            paymentMethod={state.paymentMethod}
-            bahtPerPoint={state.shop?.bahtPerPoint ?? 50}
-            onSetDiscount={(value) => dispatch({ type: "SET_DISCOUNT", value })}
-            onSetPointsUsed={(value) => dispatch({ type: "SET_POINTS_USED", value })}
-            onSetPaymentMethod={(method) => dispatch({ type: "SET_PAYMENT_METHOD", method })}
-            onBack={() => dispatch({ type: "SET_STEP", step: "cart" })}
-            onSelectMember={() => setMemberModalOpen(true)}
-            onBounceToMember={() => {
-              dispatch({ type: "SET_MEMBER", member: null });
-              setMemberModalOpen(true);
-            }}
-            onSuccess={(bill) => dispatch({ type: "SET_BILL", bill })}
-          />
-        )}
-        {state.step === "success" && (
-          <SuccessStep
-            bill={state.lastBill}
-            member={state.member}
-            cart={state.cart}
-            pointsUsed={state.pointsUsed}
-            bahtPerPoint={state.shop?.bahtPerPoint ?? 50}
-            shopName={state.shop?.name ?? ""}
-            staffName={staffName}
-            onNewTransaction={() => dispatch({ type: "RESET" })}
-          />
-        )}
-      </main>
+      <div className="flex flex-1 flex-col overflow-hidden md:flex-row">
+        <ServiceStep
+          categories={state.categories}
+          onAddService={(service) =>
+            dispatch({ type: "ADD_SERVICE", serviceId: service.id, name: service.name, price: service.price })
+          }
+        />
+        <CartRail
+          member={state.member}
+          cart={state.cart}
+          discount={state.discount}
+          pointsUsed={state.pointsUsed}
+          paymentMethod={state.paymentMethod}
+          bahtPerPoint={state.shop?.bahtPerPoint ?? 50}
+          onIncrement={(serviceId) => dispatch({ type: "INCREMENT_LINE", serviceId })}
+          onDecrement={(serviceId) => dispatch({ type: "DECREMENT_LINE", serviceId })}
+          onRemove={(serviceId) => dispatch({ type: "REMOVE_LINE", serviceId })}
+          onClearCart={() => dispatch({ type: "CLEAR_CART" })}
+          onSetDiscount={(value) => dispatch({ type: "SET_DISCOUNT", value })}
+          onSetPointsUsed={(value) => dispatch({ type: "SET_POINTS_USED", value })}
+          onSetPaymentMethod={(method) => dispatch({ type: "SET_PAYMENT_METHOD", method })}
+          onSelectMember={() => setMemberModalOpen(true)}
+          onBounceToMember={() => {
+            dispatch({ type: "SET_MEMBER", member: null });
+            setMemberModalOpen(true);
+          }}
+          onSuccess={(bill) => dispatch({ type: "SET_BILL", bill })}
+        />
+      </div>
 
       <Modal isOpen={isMemberModalOpen} onOpenChange={setMemberModalOpen}>
         <Modal.Backdrop>
@@ -293,6 +240,32 @@ export function PosApp({ staffName }: PosAppProps) {
               </Modal.Header>
               <Modal.Body>
                 <BillHistoryModal shopName={state.shop?.name ?? ""} bahtPerPoint={state.shop?.bahtPerPoint ?? 50} />
+              </Modal.Body>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
+
+      <Modal
+        isOpen={state.lastBill !== null}
+        onOpenChange={(open) => {
+          if (!open) dispatch({ type: "RESET" });
+        }}
+      >
+        <Modal.Backdrop>
+          <Modal.Container size="sm">
+            <Modal.Dialog>
+              <Modal.Body>
+                <SuccessStep
+                  bill={state.lastBill}
+                  member={state.member}
+                  cart={state.cart}
+                  pointsUsed={state.pointsUsed}
+                  bahtPerPoint={state.shop?.bahtPerPoint ?? 50}
+                  shopName={state.shop?.name ?? ""}
+                  staffName={staffName}
+                  onNewTransaction={() => dispatch({ type: "RESET" })}
+                />
               </Modal.Body>
             </Modal.Dialog>
           </Modal.Container>
