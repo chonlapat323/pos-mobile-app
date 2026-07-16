@@ -6,6 +6,7 @@ import { Button, Modal, toast } from "@heroui/react";
 import { History, LogOut, Sparkle, User } from "lucide-react";
 
 import { logout } from "@/lib/auth";
+import { cn } from "@/lib/utils";
 
 import { getCategories, getShopConfig } from "./actions";
 import { BillHistoryModal } from "./steps/bill-history-modal";
@@ -162,7 +163,10 @@ export function PosApp({ staffName }: PosAppProps) {
             type="button"
             variant={state.member ? "secondary" : "outline"}
             size="sm"
-            className="!rounded-full"
+            className={cn(
+              "!rounded-full",
+              state.member && "!border !border-accent/35 !bg-accent-soft !text-accent",
+            )}
             onPress={() => setMemberModalOpen(true)}
           >
             <User className="size-4" />
