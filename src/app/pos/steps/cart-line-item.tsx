@@ -24,7 +24,7 @@ export function CartLineItem({ line, onIncrement, onDecrement, onRemove }: CartL
           <Minus className="size-4" />
         </Button>
         <span className="w-7 text-center font-semibold text-sm">{line.quantity}</span>
-        <Button type="button" variant="secondary" size="sm" isIconOnly onPress={onIncrement}>
+        <Button type="button" variant="primary" size="sm" isIconOnly onPress={onIncrement}>
           <Plus className="size-4" />
         </Button>
       </div>
