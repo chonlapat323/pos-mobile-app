@@ -179,6 +179,7 @@ export function CartRail({
               type="button"
               variant={paymentMethod === method.value ? "primary" : "secondary"}
               size="sm"
+              fullWidth
               onPress={() => onSetPaymentMethod(method.value)}
             >
               <method.icon className="size-4" />

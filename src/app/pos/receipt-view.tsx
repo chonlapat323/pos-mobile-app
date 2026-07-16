@@ -150,7 +150,7 @@ export function ReceiptView({
     <div className="flex flex-col gap-3">
       {receiptCard}
 
-      <Button type="button" variant="secondary" size="lg" onPress={() => window.print()}>
+      <Button type="button" variant="secondary" size="lg" fullWidth onPress={() => window.print()}>
         <Printer className="size-4" />
         พิมพ์ใบเสร็จ
       </Button>

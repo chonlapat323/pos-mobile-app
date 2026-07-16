@@ -48,7 +48,7 @@ export function MemberStep({ onSelectMember, onSkip }: MemberStepProps) {
           onCreated={onSelectMember}
         />
       )}
-      <Button type="button" variant="secondary" size="lg" onPress={onSkip}>
+      <Button type="button" variant="secondary" size="lg" fullWidth onPress={onSkip}>
         ลูกค้า Walk-in (ไม่ระบุสมาชิก)
       </Button>
     </div>
