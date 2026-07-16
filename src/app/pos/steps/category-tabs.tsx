@@ -39,7 +39,7 @@ export function CategoryTabs({ categories, selectedId, onSelect }: CategoryTabsP
                 className="size-full object-cover"
               />
             </div>
-            <span className={cn("max-w-20 truncate font-medium text-xs", isSelected && "text-accent")}>
+            <span className={cn("max-w-20 truncate font-medium text-xs", isSelected ? "text-accent" : "text-soft")}>
               {category.name}
             </span>
           </button>

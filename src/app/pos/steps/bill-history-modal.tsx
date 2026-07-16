@@ -128,18 +128,18 @@ export function BillHistoryModal({ shopName, bahtPerPoint }: BillHistoryModalPro
                   key={bill.id}
                   type="button"
                   onClick={() => setSelected(bill)}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface p-3 text-left shadow-xs"
+                  className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface-tertiary p-3 text-left shadow-xs"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-sm">{bill.member ? bill.member.name : "Walk-in"}</p>
-                    <p className="text-muted text-xs">
+                    <p className="text-muted-2 text-xs">
                       {createdAtDate.toLocaleDateString("th-TH")} {createdAtDate.toLocaleTimeString("th-TH")} ·{" "}
                       {bill.staff.name}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-sm">฿{Number(bill.total).toLocaleString("th-TH")}</p>
-                    <p className="text-muted text-xs">
+                    <p className="text-muted-2 text-xs">
                       {bill.paymentMethod ? (PAYMENT_METHOD_LABELS[bill.paymentMethod] ?? bill.paymentMethod) : "-"}
                     </p>
                   </div>

@@ -39,6 +39,7 @@
       "!.next",
       "!dist",
       "!out",
+      "!react-native",
       "!src/app/pos/pos-app.tsx"
     ]
   },

@@ -14,10 +14,10 @@ interface CartLineItemProps {
 
 export function CartLineItem({ line, onIncrement, onDecrement, onRemove }: CartLineItemProps) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface p-3 shadow-xs">
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface-secondary p-3 shadow-xs">
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium text-sm">{line.name}</p>
-        <p className="text-muted text-xs">฿{line.price.toLocaleString("th-TH")} ต่อรายการ</p>
+        <p className="text-muted-2 text-xs">฿{line.price.toLocaleString("th-TH")} ต่อรายการ</p>
       </div>
       <div className="flex items-center gap-1 rounded-full bg-default p-1">
         <Button type="button" variant="secondary" size="sm" isIconOnly onPress={onDecrement}>

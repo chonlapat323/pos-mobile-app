@@ -136,7 +136,7 @@ export function PosApp({ staffName }: PosAppProps) {
 
   return (
     <div className="flex h-dvh flex-col bg-background">
-      <header className="flex items-center justify-between gap-2 border-border border-b bg-surface px-5 py-3 shadow-xs">
+      <header className="flex items-center justify-between gap-2 border-border border-b bg-background-secondary px-5 py-3 shadow-xs">
         <div className="flex items-center gap-3">
           {state.shop?.logoUrl ? (
             // biome-ignore lint/performance/noImgElement: local dev image server, next/image remote-pattern config not worth it yet
@@ -154,7 +154,7 @@ export function PosApp({ staffName }: PosAppProps) {
             <p className="font-heading font-semibold text-base leading-tight">
               {state.shop?.name ?? "POS Services"}
             </p>
-            <p className="text-muted text-xs">เลือกบริการ · {staffName}</p>
+            <p className="text-muted-2 text-xs">เลือกบริการ · {staffName}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">

@@ -11,7 +11,9 @@ export default async function Home() {
         {health ? (
           <span className="text-green-600 dark:text-green-400">เชื่อมต่อ pos-backend สำเร็จ ({health.service})</span>
         ) : (
-          <span className="text-red-600 dark:text-red-400">ยังเชื่อมต่อ pos-backend ไม่ได้ — ตรวจสอบว่า backend รันอยู่ที่พอร์ต 3010</span>
+          <span className="text-red-600 dark:text-red-400">
+            ยังเชื่อมต่อ pos-backend ไม่ได้ — ตรวจสอบว่า backend รันอยู่ที่พอร์ต 3010
+          </span>
         )}
       </div>
     </div>

@@ -19,7 +19,7 @@ export function MemberSearchResults({ members, onSelect }: MemberSearchResultsPr
           key={member.id}
           type="button"
           onClick={() => onSelect(member)}
-          className="flex items-center justify-between rounded-xl border border-border bg-surface p-3 text-left shadow-xs transition-transform active:scale-[0.98]"
+          className="flex items-center justify-between rounded-xl border border-border bg-surface-tertiary p-3 text-left shadow-xs transition-transform active:scale-[0.98]"
         >
           <div className="flex items-center gap-3">
             <div className="flex size-9 items-center justify-center rounded-full bg-default">
@@ -27,7 +27,7 @@ export function MemberSearchResults({ members, onSelect }: MemberSearchResultsPr
             </div>
             <div>
               <p className="font-medium text-sm">{member.name}</p>
-              <p className="text-muted text-xs">{member.phone}</p>
+              <p className="text-muted-2 text-xs">{member.phone}</p>
             </div>
           </div>
           <span className="font-medium text-accent text-sm">{member.pointBalance.toLocaleString("th-TH")} pt</span>

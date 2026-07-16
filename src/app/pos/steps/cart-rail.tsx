@@ -98,7 +98,7 @@ export function CartRail({
   return (
     <aside
       id="cart-rail"
-      className="flex w-full flex-col border-border border-t bg-surface md:w-[380px] md:shrink-0 md:border-t-0 md:border-l"
+      className="flex w-full flex-col border-border border-t bg-background-secondary md:w-[380px] md:shrink-0 md:border-t-0 md:border-l"
     >
       <div className="border-border border-b p-4">
         {member ? (
@@ -121,14 +121,14 @@ export function CartRail({
           <button
             type="button"
             onClick={onSelectMember}
-            className="flex w-full items-center gap-3 rounded-2xl border border-border border-dashed bg-default p-3 text-left"
+            className="flex w-full items-center gap-3 rounded-2xl border border-border-tertiary border-dashed bg-surface-tertiary p-3 text-left"
           >
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-surface-tertiary">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-default">
               <User className="size-4.5 text-muted" />
             </span>
             <span className="flex-1">
               <span className="block font-semibold text-sm">ลูกค้า Walk-in</span>
-              <span className="mt-0.5 block text-muted text-xs">แตะเพื่อระบุสมาชิก &amp; สะสมคะแนน</span>
+              <span className="mt-0.5 block text-muted-2 text-xs">แตะเพื่อระบุสมาชิก &amp; สะสมคะแนน</span>
             </span>
           </button>
         )}
@@ -137,7 +137,7 @@ export function CartRail({
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <span className="font-semibold text-sm">รายการบริการ</span>
         <div className="flex items-center gap-2">
-          <span className="text-muted text-xs">{cartCount} รายการ</span>
+          <span className="text-muted-2 text-xs">{cartCount} รายการ</span>
           {cart.length > 0 && (
             <button type="button" onClick={onClearCart} className="text-danger text-xs hover:underline">
               ล้างตะกร้า
@@ -171,7 +171,7 @@ export function CartRail({
         )}
       </div>
 
-      <div className="flex flex-col gap-3 border-border border-t bg-background p-4">
+      <div className="flex flex-col gap-3 border-border border-t bg-background-tertiary p-4">
         <div className="grid grid-cols-2 gap-2">
           {PAYMENT_METHODS.map((method) => (
             <Button
@@ -210,18 +210,18 @@ export function CartRail({
 
         <div className="flex flex-col gap-1">
           <div className="flex justify-between text-sm">
-            <span className="text-muted">ยอดรวมบริการ</span>
+            <span className="text-muted-2">ยอดรวมบริการ</span>
             <span>฿{subtotal.toLocaleString("th-TH")}</span>
           </div>
           {discount > 0 && (
             <div className="flex justify-between text-sm">
-              <span className="text-muted">ส่วนลด</span>
+              <span className="text-muted-2">ส่วนลด</span>
               <span>-฿{discount.toLocaleString("th-TH")}</span>
             </div>
           )}
           {pointsUsed > 0 && (
             <div className="flex justify-between text-sm">
-              <span className="text-muted">ใช้คะแนน ({pointsUsed})</span>
+              <span className="text-muted-2">ใช้คะแนน ({pointsUsed})</span>
               <span>-฿{pointsDiscountBaht.toLocaleString("th-TH")}</span>
             </div>
           )}
@@ -230,7 +230,7 @@ export function CartRail({
             <span className="font-bold font-heading text-2xl text-accent">฿{total.toLocaleString("th-TH")}</span>
           </div>
           {member && (
-            <p className="text-right text-muted text-xs">
+            <p className="text-right text-muted-2 text-xs">
               จะได้รับ <span className="font-semibold text-accent">+{pointsEarnedPreview}</span> คะแนน
             </p>
           )}
