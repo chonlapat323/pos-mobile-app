@@ -9,8 +9,11 @@ body {
 }
 
 @media print {
+  /* Page height is set dynamically per print via an injected <style id="receipt-page-size">
+     (see success-step.tsx) - "size: 80mm auto" is not valid CSS (auto can't combine with a
+     fixed length) and gets silently dropped, so this is just a width-only fallback. */
   @page {
-    size: 80mm auto;
+    size: 80mm 200mm;
     margin: 0;
   }
   body * {
