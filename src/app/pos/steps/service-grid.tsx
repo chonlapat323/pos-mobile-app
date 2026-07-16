@@ -1,0 +1,42 @@
+"use client";
+
+import { ImageOff } from "lucide-react";
+
+import type { Service } from "../types";
+
+interface ServiceGridProps {
+  services: Service[];
+  onAdd: (service: Service) => void;
+}
+
+export function ServiceGrid({ services, onAdd }: ServiceGridProps) {
+  if (services.length === 0) {
+    return <p className="text-muted text-sm">ไม่มีบริการในกลุ่มนี้</p>;
+  }
+
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+      {services.map((service) => (
+        <button
+          key={service.id}
+          type="button"
+          onClick={() => onAdd(service)}
+          className="flex flex-col gap-2 rounded-lg border border-border p-3 text-left hover:bg-default"
+        >
+          <div className="flex aspect-video items-center justify-center overflow-hidden rounded-md bg-default">
+            {service.imageUrl ? (
+              // biome-ignore lint/performance/noImgElement: local dev image server, next/image remote-pattern config not worth it yet
+              <img src={service.imageUrl} alt="" className="size-full object-cover" />
+            ) : (
+              <ImageOff className="size-5 text-muted" />
+            )}
+          </div>
+          <div>
+            <p className="font-medium text-sm">{service.name}</p>
+            <p className="font-medium text-accent text-sm">฿{Number(service.price).toLocaleString("th-TH")}</p>
+          </div>
+        </button>
+      ))}
+    </div>
+  );
+}
