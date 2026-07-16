@@ -4,12 +4,11 @@ import { useEffect, useRef, useState } from "react";
 
 import { toast } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ShoppingCart } from "lucide-react";
 
 import { getServicesByCategory } from "../actions";
 import type { Category, Service } from "../types";
 import { CategoryTabs } from "./category-tabs";
-import { ServiceGrid } from "./service-grid";
+import { mockPhotoUrl, ServiceGrid } from "./service-grid";
 
 interface FlyingItem {
   id: number;
@@ -17,7 +16,7 @@ interface FlyingItem {
   fromY: number;
   deltaX: number;
   deltaY: number;
-  imageUrl: string | null;
+  imageUrl: string;
 }
 
 const FLY_SIZE = 40;
@@ -75,7 +74,14 @@ export function ServiceStep({ categories, onAddService }: ServiceStepProps) {
     const id = flyIdRef.current++;
     setFlyingItems((prev) => [
       ...prev,
-      { id, fromX, fromY, deltaX: toX - fromX, deltaY: toY - fromY, imageUrl: service.imageUrl },
+      {
+        id,
+        fromX,
+        fromY,
+        deltaX: toX - fromX,
+        deltaY: toY - fromY,
+        imageUrl: service.imageUrl ?? mockPhotoUrl(service.id),
+      },
     ]);
   }
 
@@ -104,14 +110,8 @@ export function ServiceStep({ categories, onAddService }: ServiceStepProps) {
             style={{ position: "fixed", left: item.fromX, top: item.fromY, width: FLY_SIZE, height: FLY_SIZE }}
             className="pointer-events-none z-50 overflow-hidden rounded-full border border-border bg-surface shadow-lg"
           >
-            {item.imageUrl ? (
-              // biome-ignore lint/performance/noImgElement: local dev image server, next/image remote-pattern config not worth it yet
-              <img src={item.imageUrl} alt="" className="size-full object-cover" />
-            ) : (
-              <div className="flex size-full items-center justify-center bg-accent-soft">
-                <ShoppingCart className="size-4 text-accent" />
-              </div>
-            )}
+            {/* biome-ignore lint/performance/noImgElement: local dev image server, next/image remote-pattern config not worth it yet */}
+            <img src={item.imageUrl} alt="" className="size-full object-cover" />
           </motion.div>
         ))}
       </AnimatePresence>

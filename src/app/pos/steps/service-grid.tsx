@@ -1,13 +1,19 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Clock, ImageOff } from "lucide-react";
+import { Clock } from "lucide-react";
 
 import type { Service } from "../types";
 
 interface ServiceGridProps {
   services: Service[];
   onAdd: (service: Service, originEl: HTMLElement) => void;
+}
+
+// Services without a real photo get a stable mock one (seeded by id, so it doesn't reshuffle on
+// every render) instead of a bare placeholder icon - closer to the reference mockup's fully-photo menu.
+export function mockPhotoUrl(seed: string) {
+  return `https://picsum.photos/seed/${seed}/300/200`;
 }
 
 export function ServiceGrid({ services, onAdd }: ServiceGridProps) {
@@ -26,12 +32,8 @@ export function ServiceGrid({ services, onAdd }: ServiceGridProps) {
           className="flex flex-col overflow-hidden rounded-2xl border border-border bg-surface text-left shadow-xs"
         >
           <div className="relative flex aspect-video items-center justify-center overflow-hidden bg-default">
-            {service.imageUrl ? (
-              // biome-ignore lint/performance/noImgElement: local dev image server, next/image remote-pattern config not worth it yet
-              <img src={service.imageUrl} alt="" className="size-full object-cover" />
-            ) : (
-              <ImageOff className="size-5 text-muted" />
-            )}
+            {/* biome-ignore lint/performance/noImgElement: local dev image server, next/image remote-pattern config not worth it yet */}
+            <img src={service.imageUrl || mockPhotoUrl(service.id)} alt="" className="size-full object-cover" />
             {service.status === "PROMOTION" && (
               <span className="absolute top-2 left-2 rounded-full bg-accent px-2 py-0.5 font-bold text-[10px] text-accent-foreground tracking-wide">
                 PROMO

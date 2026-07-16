@@ -21,9 +21,8 @@ body {
 }
 
 @media print {
-  /* Page height is set dynamically per print via an injected <style id="receipt-page-size">
-     (see success-step.tsx) - "size: 80mm auto" is not valid CSS (auto can't combine with a
-     fixed length) and gets silently dropped, so this is just a width-only fallback. */
+  /* "size: 80mm auto" is not valid CSS (auto can't combine with a fixed length) and gets silently
+     dropped, so this is a static (not exact-height) fallback - fine for receipt paper. */
   @page {
     size: 80mm 200mm;
     margin: 0;
@@ -36,6 +35,12 @@ body {
     visibility: visible;
   }
   .print-receipt {
+    /* .print-receipt is portaled directly onto <body> (see receipt-view.tsx) specifically so this
+       resolves against the real page, not a Modal ancestor - HeroUI's Modal applies a CSS transform
+       for its open/close animation, which makes it the containing block for any positioned
+       descendant, so printing from inside it lands at the modal's on-screen position instead of the
+       top of the physical page. */
+    display: block !important;
     position: absolute;
     top: 0;
     left: 0;

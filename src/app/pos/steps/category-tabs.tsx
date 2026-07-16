@@ -1,7 +1,5 @@
 "use client";
 
-import { Tag } from "lucide-react";
-
 import { cn } from "@/lib/utils";
 
 import type { Category } from "../types";
@@ -10,6 +8,11 @@ interface CategoryTabsProps {
   categories: Category[];
   selectedId: string | null;
   onSelect: (categoryId: string) => void;
+}
+
+// Categories without a real photo get a stable mock one (seeded by id) instead of a bare icon.
+function mockPhotoUrl(seed: string) {
+  return `https://picsum.photos/seed/${seed}/120/120`;
 }
 
 export function CategoryTabs({ categories, selectedId, onSelect }: CategoryTabsProps) {
@@ -33,12 +36,8 @@ export function CategoryTabs({ categories, selectedId, onSelect }: CategoryTabsP
                 isSelected && "ring-2 ring-accent",
               )}
             >
-              {category.imageUrl ? (
-                // biome-ignore lint/performance/noImgElement: local dev image server, next/image remote-pattern config not worth it yet
-                <img src={category.imageUrl} alt="" className="size-full object-cover" />
-              ) : (
-                <Tag className="size-6 text-muted" />
-              )}
+              {/* biome-ignore lint/performance/noImgElement: local dev image server, next/image remote-pattern config not worth it yet */}
+              <img src={category.imageUrl || mockPhotoUrl(category.id)} alt="" className="size-full object-cover" />
             </div>
             <span className={cn("max-w-20 truncate font-medium text-xs", isSelected && "text-accent")}>
               {category.name}
