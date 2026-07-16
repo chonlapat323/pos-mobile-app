@@ -60,10 +60,15 @@ export function ServiceStep({ categories, cartCount, onAddService, onViewCart }:
           />
         )}
       </div>
-      <div className="flex items-center justify-end gap-3 border-border border-t pt-3">
-        <Button type="button" onPress={onViewCart}>
+      <div className="flex items-center justify-end border-border border-t pt-3">
+        <Button type="button" size="lg" onPress={onViewCart}>
           <ShoppingCart className="size-4" />
-          ตรวจสอบตะกร้า ({cartCount})
+          ตรวจสอบตะกร้า
+          {cartCount > 0 && (
+            <span className="ml-1 flex size-5 items-center justify-center rounded-full bg-accent-foreground/20 font-semibold text-xs">
+              {cartCount}
+            </span>
+          )}
         </Button>
       </div>
     </div>

@@ -3,14 +3,15 @@
 import { useState } from "react";
 
 import { Button, Input, Label, TextField, toast } from "@heroui/react";
+import { Banknote, CreditCard, Repeat } from "lucide-react";
 
 import { createBill } from "../actions";
 import type { Bill, CartLine, Member, PaymentMethod } from "../types";
 
-const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
-  { value: "CASH", label: "เงินสด" },
-  { value: "TRANSFER", label: "โอน" },
-  { value: "CARD", label: "บัตร" },
+const PAYMENT_METHODS: { value: PaymentMethod; label: string; icon: typeof Banknote }[] = [
+  { value: "CASH", label: "เงินสด", icon: Banknote },
+  { value: "TRANSFER", label: "โอน", icon: Repeat },
+  { value: "CARD", label: "บัตร", icon: CreditCard },
 ];
 
 interface PaymentStepProps {
@@ -89,15 +90,17 @@ export function PaymentStep({
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4">
       <div className="flex flex-col gap-2">
         <Label>ช่องทางชำระเงิน</Label>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {PAYMENT_METHODS.map((method) => (
             <Button
               key={method.value}
               type="button"
               variant={paymentMethod === method.value ? "primary" : "secondary"}
-              fullWidth
+              size="lg"
+              className="!flex-col !h-auto gap-1 py-3"
               onPress={() => onSetPaymentMethod(method.value)}
             >
+              <method.icon className="size-5" />
               {method.label}
             </Button>
           ))}
@@ -131,7 +134,7 @@ export function PaymentStep({
         </div>
       )}
 
-      <div className="flex flex-col gap-1 rounded-lg border border-border p-4">
+      <div className="flex flex-col gap-1.5 rounded-xl border border-border bg-surface p-4 shadow-xs">
         <div className="flex justify-between text-sm">
           <span className="text-muted">ยอดรวมบริการ</span>
           <span>฿{subtotal.toLocaleString("th-TH")}</span>
@@ -148,18 +151,18 @@ export function PaymentStep({
             <span>-฿{pointsDiscountBaht.toLocaleString("th-TH")}</span>
           </div>
         )}
-        <div className="flex justify-between border-border border-t pt-1 font-medium text-lg">
+        <div className="flex justify-between border-border border-t pt-2 font-semibold text-xl">
           <span>ยอดชำระ</span>
           <span>฿{total.toLocaleString("th-TH")}</span>
         </div>
         {member && <p className="font-medium text-accent text-sm">จะได้รับ {pointsEarnedPreview} point</p>}
       </div>
 
-      <div className="mt-auto flex items-center justify-between gap-3">
-        <Button type="button" variant="secondary" onPress={onBack}>
+      <div className="mt-auto flex items-center gap-3">
+        <Button type="button" variant="secondary" size="lg" onPress={onBack}>
           ย้อนกลับ
         </Button>
-        <Button type="button" onPress={handleSubmit} isDisabled={submitting}>
+        <Button type="button" size="lg" fullWidth onPress={handleSubmit} isDisabled={submitting}>
           {submitting ? "กำลังบันทึก..." : "ยืนยันการชำระเงิน"}
         </Button>
       </div>

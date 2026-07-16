@@ -19,7 +19,7 @@ export function MemberSearchResults({ members, onSelect }: MemberSearchResultsPr
           key={member.id}
           type="button"
           onClick={() => onSelect(member)}
-          className="flex items-center justify-between rounded-lg border border-border p-3 text-left hover:bg-default"
+          className="flex items-center justify-between rounded-xl border border-border bg-surface p-3 text-left shadow-xs transition-transform active:scale-[0.98]"
         >
           <div className="flex items-center gap-3">
             <div className="flex size-9 items-center justify-center rounded-full bg-default">

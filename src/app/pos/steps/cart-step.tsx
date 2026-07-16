@@ -44,15 +44,15 @@ export function CartStep({ cart, onIncrement, onDecrement, onRemove, onBack, onP
           </div>
         )}
       </div>
-      <div className="flex items-center justify-between border-border border-t pt-3 font-medium text-lg">
-        <span>รวม</span>
-        <span>฿{subtotal.toLocaleString("th-TH")}</span>
+      <div className="flex items-center justify-between border-border border-t pt-3">
+        <span className="text-muted">ยอดรวม</span>
+        <span className="font-semibold text-xl">฿{subtotal.toLocaleString("th-TH")}</span>
       </div>
-      <div className="flex items-center justify-between gap-3">
-        <Button type="button" variant="secondary" onPress={onBack}>
+      <div className="flex items-center gap-3">
+        <Button type="button" variant="secondary" size="lg" onPress={onBack}>
           เพิ่มบริการต่อ
         </Button>
-        <Button type="button" onPress={handleProceed}>
+        <Button type="button" size="lg" fullWidth onPress={handleProceed}>
           ดำเนินการชำระเงิน
         </Button>
       </div>

@@ -21,9 +21,9 @@ export function ServiceGrid({ services, onAdd }: ServiceGridProps) {
           key={service.id}
           type="button"
           onClick={() => onAdd(service)}
-          className="flex flex-col gap-2 rounded-lg border border-border p-3 text-left hover:bg-default"
+          className="flex flex-col gap-2 rounded-xl border border-border bg-surface p-3 text-left shadow-xs transition-transform active:scale-95"
         >
-          <div className="flex aspect-video items-center justify-center overflow-hidden rounded-md bg-default">
+          <div className="flex aspect-video items-center justify-center overflow-hidden rounded-lg bg-default">
             {service.imageUrl ? (
               // biome-ignore lint/performance/noImgElement: local dev image server, next/image remote-pattern config not worth it yet
               <img src={service.imageUrl} alt="" className="size-full object-cover" />

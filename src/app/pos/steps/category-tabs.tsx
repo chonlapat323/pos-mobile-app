@@ -19,10 +19,10 @@ export function CategoryTabs({ categories, selectedId, onSelect }: CategoryTabsP
           type="button"
           onClick={() => onSelect(category.id)}
           className={cn(
-            "shrink-0 rounded-full border px-4 py-2 text-sm",
+            "shrink-0 rounded-full border px-5 py-2.5 font-medium text-sm transition-colors active:scale-95",
             selectedId === category.id
-              ? "border-accent bg-accent text-accent-foreground"
-              : "border-border text-foreground/80",
+              ? "border-accent bg-accent text-accent-foreground shadow-xs"
+              : "border-border bg-surface text-foreground/80 hover:bg-default",
           )}
         >
           {category.name}

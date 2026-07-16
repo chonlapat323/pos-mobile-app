@@ -153,17 +153,18 @@ export function PosApp({ staffName }: PosAppProps) {
 
   return (
     <div className="flex h-dvh flex-col bg-background">
-      <header className="flex items-center justify-between gap-2 border-border border-b px-4 py-3">
+      <header className="flex items-center justify-between gap-2 border-border border-b bg-surface px-4 py-3 shadow-xs">
         <div>
-          <p className="font-medium text-sm">{STEP_LABELS[state.step]}</p>
+          <p className="font-semibold text-base">{STEP_LABELS[state.step]}</p>
           <p className="text-muted text-xs">{staffName}</p>
         </div>
         <div className="flex items-center gap-2">
           {state.step !== "success" && (
             <Button
               type="button"
-              variant={state.member ? "secondary" : "ghost"}
+              variant={state.member ? "secondary" : "outline"}
               size="sm"
+              className="!rounded-full"
               onPress={() => setMemberModalOpen(true)}
             >
               <User className="size-4" />
