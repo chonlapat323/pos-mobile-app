@@ -164,8 +164,8 @@ export function PosApp({ staffName }: PosAppProps) {
             variant={state.member ? "secondary" : "outline"}
             size="sm"
             className={cn(
-              "!rounded-full",
-              state.member && "!border !border-accent/35 !bg-accent-soft !text-accent",
+              "rounded-full",
+              state.member && "border border-accent/35 bg-accent-soft text-accent",
             )}
             onPress={() => setMemberModalOpen(true)}
           >
