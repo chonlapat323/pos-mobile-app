@@ -50,7 +50,7 @@ const initialState: PosState = {
   cart: [],
   discount: 0,
   pointsUsed: 0,
-  paymentMethod: null,
+  paymentMethod: "CASH",
   lastBill: null,
   categories: [],
   shop: null,
@@ -248,6 +248,7 @@ export function PosApp({ staffName }: PosAppProps) {
             cart={state.cart}
             pointsUsed={state.pointsUsed}
             bahtPerPoint={state.shop?.bahtPerPoint ?? 50}
+            shopName={state.shop?.name ?? ""}
             staffName={staffName}
             onNewTransaction={() => dispatch({ type: "RESET" })}
           />

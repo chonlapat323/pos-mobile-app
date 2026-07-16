@@ -17,6 +17,7 @@ interface SuccessStepProps {
   cart: CartLine[];
   pointsUsed: number;
   bahtPerPoint: number;
+  shopName: string;
   staffName: string;
   onNewTransaction: () => void;
 }
@@ -27,6 +28,7 @@ export function SuccessStep({
   cart,
   pointsUsed,
   bahtPerPoint,
+  shopName,
   staffName,
   onNewTransaction,
 }: SuccessStepProps) {
@@ -53,6 +55,7 @@ export function SuccessStep({
 
       <div className="print-receipt flex flex-col gap-3 rounded-lg border border-border p-4 font-mono text-sm">
         <div className="flex flex-col items-center gap-0.5 text-center">
+          {shopName && <p className="font-semibold text-base">{shopName}</p>}
           <p className="font-semibold">ใบเสร็จรับเงิน</p>
           <p className="text-muted text-xs">เลขที่ {bill.id.slice(-8).toUpperCase()}</p>
           <p className="text-muted text-xs">

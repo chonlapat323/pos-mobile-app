@@ -3,15 +3,15 @@
 import { useState } from "react";
 
 import { Button, Input, Label, TextField, toast } from "@heroui/react";
-import { Banknote, CreditCard, Repeat } from "lucide-react";
+import { Banknote, Repeat } from "lucide-react";
 
 import { createBill } from "../actions";
 import type { Bill, CartLine, Member, PaymentMethod } from "../types";
 
+// CARD is a valid PaymentMethod on the backend but not offered here yet - add back to this list when ready.
 const PAYMENT_METHODS: { value: PaymentMethod; label: string; icon: typeof Banknote }[] = [
   { value: "CASH", label: "เงินสด", icon: Banknote },
   { value: "TRANSFER", label: "โอน", icon: Repeat },
-  { value: "CARD", label: "บัตร", icon: CreditCard },
 ];
 
 interface PaymentStepProps {
@@ -90,7 +90,7 @@ export function PaymentStep({
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4">
       <div className="flex flex-col gap-2">
         <Label>ช่องทางชำระเงิน</Label>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {PAYMENT_METHODS.map((method) => (
             <Button
               key={method.value}
