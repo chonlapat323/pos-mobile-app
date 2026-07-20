@@ -16,6 +16,7 @@ const STATUS_LABELS: Record<SubscriptionHistoryEntry["status"], string> = {
   TRIALING: "ทดลองใช้ฟรี",
   ACTIVE: "ใช้งานอยู่",
   EXPIRED: "หมดอายุแล้ว",
+  CANCELLED: "ยกเลิกแล้ว",
 };
 
 const PAYMENT_STATUS_LABELS: Record<string, string> = {
@@ -25,7 +26,7 @@ const PAYMENT_STATUS_LABELS: Record<string, string> = {
 };
 
 function statusColorFor(status: SubscriptionHistoryEntry["status"]) {
-  if (status === "EXPIRED") return colors.danger;
+  if (status === "EXPIRED" || status === "CANCELLED") return colors.danger;
   if (status === "ACTIVE") return colors.success;
   return colors.accent;
 }

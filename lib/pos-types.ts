@@ -91,7 +91,7 @@ export type PurchaseStatus = "PENDING" | "PAID" | "FAILED";
 
 export interface SubscriptionHistoryEntry {
   id: string;
-  status: "PENDING" | "TRIALING" | "ACTIVE" | "EXPIRED";
+  status: "PENDING" | "TRIALING" | "ACTIVE" | "EXPIRED" | "CANCELLED";
   startAt: string;
   endAt: string;
   createdAt: string;
