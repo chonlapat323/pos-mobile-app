@@ -30,7 +30,8 @@
         {
           "faceIDPermission": "Allow POS ขายบริการ to access your credentials."
         }
-      ]
+      ],
+      "expo-splash-screen"
     ],
     "experiments": {
       "typedRoutes": true
