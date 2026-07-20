@@ -9,6 +9,7 @@ import type {
   PurchaseStatus,
   Service,
   Shop,
+  SubscriptionHistoryEntry,
   SubscriptionPackage,
   SubscriptionPurchase,
 } from "./pos-types";
@@ -24,6 +25,9 @@ type PackagesResult = { success: true; data: SubscriptionPackage[] } | { success
 type MySubscriptionResult = { success: true; data: MySubscription } | { success: false; error: string };
 type PurchaseResult = { success: true; data: SubscriptionPurchase } | { success: false; error: string };
 type PurchaseStatusResult = { success: true; data: { status: PurchaseStatus } } | { success: false; error: string };
+type SubscriptionHistoryResult =
+  | { success: true; data: SubscriptionHistoryEntry[] }
+  | { success: false; error: string };
 
 export async function searchMembers(search: string): Promise<MembersResult> {
   try {
@@ -153,5 +157,14 @@ export async function getPurchaseStatus(paymentId: string): Promise<PurchaseStat
     return { success: true, data };
   } catch (error) {
     return { success: false, error: error instanceof ApiError ? error.message : "ตรวจสอบสถานะไม่สำเร็จ" };
+  }
+}
+
+export async function getSubscriptionHistory(): Promise<SubscriptionHistoryResult> {
+  try {
+    const data = await apiFetch<SubscriptionHistoryEntry[]>("/subscriptions/history");
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: error instanceof ApiError ? error.message : "โหลดประวัติการชำระเงินไม่สำเร็จ" };
   }
 }

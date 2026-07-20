@@ -88,3 +88,13 @@ export interface SubscriptionPurchase {
 }
 
 export type PurchaseStatus = "PENDING" | "PAID" | "FAILED";
+
+export interface SubscriptionHistoryEntry {
+  id: string;
+  status: "PENDING" | "TRIALING" | "ACTIVE" | "EXPIRED";
+  startAt: string;
+  endAt: string;
+  createdAt: string;
+  package: SubscriptionPackage;
+  payments: { id: string; amountThb: number; status: PurchaseStatus; paidAt: string | null }[];
+}

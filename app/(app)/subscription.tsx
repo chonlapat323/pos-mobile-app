@@ -108,6 +108,7 @@ export default function SubscriptionScreen() {
 
   const selectedPackage = packages.find((p) => p.id === selectedId) ?? null;
   const statusColor = statusColorFor(me?.subscriptionStatus);
+  const minPurchasableDurationDays = me?.subscriptionStatus === "ACTIVE" ? (me.currentPackage?.durationDays ?? 0) : 0;
 
   if (purchase) {
     return (
@@ -173,6 +174,11 @@ export default function SubscriptionScreen() {
                   })}
                 </Text>
               )}
+              <Pressable onPress={() => router.push("/subscription-history")} className="mt-1">
+                <Text className="font-ui-medium text-[12px]" style={{ color: colors.accent }}>
+                  ดูประวัติการชำระเงิน
+                </Text>
+              </Pressable>
             </View>
 
             <Text className="font-ui-semibold text-[14px] text-text">เลือกแพ็กเกจ</Text>
@@ -180,23 +186,36 @@ export default function SubscriptionScreen() {
             {packages.map((pkg) => {
               const isHighlight = pkg.code === "ONE_YEAR";
               const isSelected = selectedId === pkg.id;
+              const isCurrent = me.subscriptionStatus === "ACTIVE" && me.currentPackage?.code === pkg.code;
+              const isDisabled = pkg.durationDays < minPurchasableDurationDays;
               return (
                 <Pressable
                   key={pkg.id}
+                  disabled={isDisabled}
                   onPress={() => setSelectedId(pkg.id)}
                   className="gap-2 rounded-2xl border p-4"
                   style={{
                     borderColor: isSelected ? colors.accent : colors.border,
                     borderWidth: isSelected ? 2 : 1,
                     backgroundColor: isHighlight ? colors.accentSoft : colors.card,
+                    opacity: isDisabled ? 0.4 : 1,
                   }}
                 >
                   <View className="flex-row items-center justify-between">
                     <Text className="font-ui-semibold text-[15px] text-text">{pkg.name}</Text>
-                    <View className="rounded-full px-2.5 py-1" style={{ backgroundColor: colors.raised }}>
-                      <Text className="font-ui-medium text-[11px] text-muted2">
-                        {PACKAGE_DURATION_LABELS[pkg.code]}
-                      </Text>
+                    <View className="flex-row gap-1.5">
+                      {isCurrent && (
+                        <View className="rounded-full px-2.5 py-1" style={{ backgroundColor: colors.accentSoft }}>
+                          <Text className="font-ui-medium text-[11px]" style={{ color: colors.accent }}>
+                            แพ็กเกจปัจจุบัน
+                          </Text>
+                        </View>
+                      )}
+                      <View className="rounded-full px-2.5 py-1" style={{ backgroundColor: colors.raised }}>
+                        <Text className="font-ui-medium text-[11px] text-muted2">
+                          {PACKAGE_DURATION_LABELS[pkg.code]}
+                        </Text>
+                      </View>
                     </View>
                   </View>
                   <View className="flex-row items-end gap-2">
