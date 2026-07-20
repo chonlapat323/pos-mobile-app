@@ -42,7 +42,8 @@
       "!babel.config.js",
       "!metro.config.js",
       "!tailwind.config.js",
-      "!*.dc.html"
+      "!*.dc.html",
+      "!contexts/pos-cart.tsx"
     ]
   },
   "formatter": {
