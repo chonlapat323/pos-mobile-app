@@ -37,6 +37,15 @@ function statusColorFor(status: MySubscription["subscriptionStatus"] | undefined
   return colors.accent;
 }
 
+// Matches the backend's RENEWAL_WINDOW_DAYS (subscriptions.service.ts) - renewal only opens up
+// this close to expiry so a shop already on its top package can't just keep re-buying and
+// silently discarding whatever time it has left.
+const RENEWAL_WINDOW_DAYS = 7;
+
+function daysUntil(dateIso: string) {
+  return Math.ceil((new Date(dateIso).getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+}
+
 export default function SubscriptionScreen() {
   const { user } = useSession();
   const { refresh: refreshSharedSubscription } = useSubscriptionStatus();
@@ -113,6 +122,16 @@ export default function SubscriptionScreen() {
   const statusColor = statusColorFor(me?.subscriptionStatus);
   const minPurchasableDurationDays = me?.subscriptionStatus === "ACTIVE" ? (me.currentPackage?.durationDays ?? 0) : 0;
 
+  const highestPackage = packages.reduce<SubscriptionPackage | null>(
+    (max, pkg) => (!max || pkg.durationDays > max.durationDays ? pkg : max),
+    null,
+  );
+  const isOnHighestTier =
+    me?.subscriptionStatus === "ACTIVE" && highestPackage !== null && me.currentPackage?.code === highestPackage.code;
+  const daysLeft = me?.subscriptionEndsAt ? daysUntil(me.subscriptionEndsAt) : null;
+  const renewalLocked = isOnHighestTier && daysLeft !== null && daysLeft > RENEWAL_WINDOW_DAYS;
+  const isRenewal = me?.subscriptionStatus === "ACTIVE";
+
   if (purchase) {
     return (
       <View
@@ -184,60 +203,83 @@ export default function SubscriptionScreen() {
               </Pressable>
             </View>
 
-            <Text className="font-ui-semibold text-[14px] text-text">เลือกแพ็กเกจ</Text>
+            {renewalLocked ? (
+              <View
+                className="gap-1 rounded-2xl border p-4"
+                style={{ borderColor: colors.border, backgroundColor: colors.card }}
+              >
+                <Text className="font-ui-semibold text-[13px] text-text">
+                  คุณใช้แพ็กเกจสูงสุด ({highestPackage?.name}) อยู่แล้ว
+                </Text>
+                <Text className="text-[12px] text-muted2">
+                  จะสามารถต่ออายุได้เมื่อเหลือเวลาใช้งาน ≤{RENEWAL_WINDOW_DAYS} วันก่อนหมดอายุ
+                </Text>
+              </View>
+            ) : (
+              <>
+                <Text className="font-ui-semibold text-[14px] text-text">เลือกแพ็กเกจ</Text>
+                {isRenewal && (
+                  <Text className="-mt-2 text-[11px] text-muted2">
+                    ต่ออายุตอนนี้จะได้รับเวลาใช้งานเพิ่มต่อจากวันหมดอายุเดิม ไม่เสียเวลาที่เหลืออยู่
+                  </Text>
+                )}
 
-            {packages.map((pkg) => {
-              const isHighlight = pkg.code === "ONE_YEAR";
-              const isSelected = selectedId === pkg.id;
-              const isCurrent = me.subscriptionStatus === "ACTIVE" && me.currentPackage?.code === pkg.code;
-              const isDisabled = pkg.durationDays < minPurchasableDurationDays;
-              return (
-                <Pressable
-                  key={pkg.id}
-                  disabled={isDisabled}
-                  onPress={() => setSelectedId(pkg.id)}
-                  className="gap-2 rounded-2xl border p-4"
-                  style={{
-                    borderColor: isSelected ? colors.accent : colors.border,
-                    borderWidth: isSelected ? 2 : 1,
-                    backgroundColor: isHighlight ? colors.accentSoft : colors.card,
-                    opacity: isDisabled ? 0.4 : 1,
-                  }}
-                >
-                  <View className="flex-row items-center justify-between">
-                    <Text className="font-ui-semibold text-[15px] text-text">{pkg.name}</Text>
-                    <View className="flex-row gap-1.5">
-                      {isCurrent && (
-                        <View className="rounded-full px-2.5 py-1" style={{ backgroundColor: colors.accentSoft }}>
-                          <Text className="font-ui-medium text-[11px]" style={{ color: colors.accent }}>
-                            แพ็กเกจปัจจุบัน
-                          </Text>
+                {packages.map((pkg) => {
+                  const isHighlight = pkg.code === "ONE_YEAR";
+                  const isSelected = selectedId === pkg.id;
+                  const isCurrent = me.subscriptionStatus === "ACTIVE" && me.currentPackage?.code === pkg.code;
+                  const isDisabled = pkg.durationDays < minPurchasableDurationDays;
+                  return (
+                    <Pressable
+                      key={pkg.id}
+                      disabled={isDisabled}
+                      onPress={() => setSelectedId(pkg.id)}
+                      className="gap-2 rounded-2xl border p-4"
+                      style={{
+                        borderColor: isSelected ? colors.accent : colors.border,
+                        borderWidth: isSelected ? 2 : 1,
+                        backgroundColor: isHighlight ? colors.accentSoft : colors.card,
+                        opacity: isDisabled ? 0.4 : 1,
+                      }}
+                    >
+                      <View className="flex-row items-center justify-between">
+                        <Text className="font-ui-semibold text-[15px] text-text">{pkg.name}</Text>
+                        <View className="flex-row gap-1.5">
+                          {isCurrent && (
+                            <View className="rounded-full px-2.5 py-1" style={{ backgroundColor: colors.accentSoft }}>
+                              <Text className="font-ui-medium text-[11px]" style={{ color: colors.accent }}>
+                                แพ็กเกจปัจจุบัน
+                              </Text>
+                            </View>
+                          )}
+                          <View className="rounded-full px-2.5 py-1" style={{ backgroundColor: colors.raised }}>
+                            <Text className="font-ui-medium text-[11px] text-muted2">
+                              {PACKAGE_DURATION_LABELS[pkg.code]}
+                            </Text>
+                          </View>
                         </View>
-                      )}
-                      <View className="rounded-full px-2.5 py-1" style={{ backgroundColor: colors.raised }}>
-                        <Text className="font-ui-medium text-[11px] text-muted2">
-                          {PACKAGE_DURATION_LABELS[pkg.code]}
-                        </Text>
                       </View>
-                    </View>
-                  </View>
-                  <View className="flex-row items-end gap-2">
-                    <Text className="font-ui-bold text-[26px] text-text">฿{pkg.priceThb.toLocaleString("th-TH")}</Text>
-                    <Text className="mb-1 text-[12px] text-muted2">{perMonthLabel(pkg)}</Text>
-                  </View>
-                  {isHighlight && (
-                    <Text className="font-ui-medium text-[11px]" style={{ color: colors.accent }}>
-                      คุ้มที่สุด
-                    </Text>
-                  )}
-                </Pressable>
-              );
-            })}
+                      <View className="flex-row items-end gap-2">
+                        <Text className="font-ui-bold text-[26px] text-text">
+                          ฿{pkg.priceThb.toLocaleString("th-TH")}
+                        </Text>
+                        <Text className="mb-1 text-[12px] text-muted2">{perMonthLabel(pkg)}</Text>
+                      </View>
+                      {isHighlight && (
+                        <Text className="font-ui-medium text-[11px]" style={{ color: colors.accent }}>
+                          คุ้มที่สุด
+                        </Text>
+                      )}
+                    </Pressable>
+                  );
+                })}
+              </>
+            )}
           </>
         )}
       </ScrollView>
 
-      {!loading && me && (
+      {!loading && me && !renewalLocked && (
         <View className="border-t p-4" style={{ borderColor: colors.border }}>
           <Button isLoading={purchasing} isDisabled={!selectedPackage} onPress={handleSubscribe} fullWidth>
             {selectedPackage ? `ชำระเงิน — ฿${selectedPackage.priceThb.toLocaleString("th-TH")}` : "เลือกแพ็กเกจ"}
