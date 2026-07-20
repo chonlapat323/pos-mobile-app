@@ -49,7 +49,17 @@ function buildReceiptHtml(props: ReceiptViewProps) {
 
   return `
     <html>
-      <body style="font-family:monospace;color:#2a2620;background:#f6f3ee;padding:20px;width:80mm">
+      <head>
+        <style>
+          /* Two explicit lengths, not "80mm auto" - a page size mixing a fixed length with the
+             auto keyword is invalid CSS and gets silently dropped, falling back to a full
+             Letter/A4 page (the exact bug this was fixed for once already, in the old web app). */
+          @page { size: 80mm 200mm; margin: 0; }
+          * { box-sizing: border-box; }
+          body { margin: 0; }
+        </style>
+      </head>
+      <body style="font-family:monospace;color:#2a2620;background:#f6f3ee;padding:16px;width:80mm">
         <div style="text-align:center">
           ${props.shopName ? `<p style="font-weight:bold;margin:0">${props.shopName}</p>` : ""}
           <p style="font-weight:600;margin:4px 0 0">ใบเสร็จรับเงิน</p>
