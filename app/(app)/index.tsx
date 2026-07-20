@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Pressable, Text, useWindowDimensions, View } from "react-native";
 
 import { Image } from "expo-image";
@@ -7,9 +8,18 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CartRail } from "@/components/pos/cart-rail";
 import { ServiceStep } from "@/components/pos/service-step";
+import { Button } from "@/components/ui/button";
 import { usePosCart } from "@/contexts/pos-cart";
 import { useSession } from "@/contexts/session";
+import { getMySubscription } from "@/lib/pos-api";
+import type { MySubscription } from "@/lib/pos-types";
 import { colors } from "@/lib/theme";
+
+const EXPIRY_WARNING_DAYS = 7;
+
+function daysUntil(dateIso: string) {
+  return Math.ceil((new Date(dateIso).getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+}
 
 export default function PosScreen() {
   const { user, signOut } = useSession();
@@ -17,6 +27,27 @@ export default function PosScreen() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const isWide = width >= 820;
+
+  const [subscription, setSubscription] = useState<MySubscription | null>(null);
+  const [showExpiryWarning, setShowExpiryWarning] = useState(false);
+
+  useEffect(() => {
+    if (user?.role !== "OWNER") return;
+    void getMySubscription().then((result) => {
+      if (!result.success) return;
+      setSubscription(result.data);
+      if (
+        (result.data.subscriptionStatus === "TRIALING" || result.data.subscriptionStatus === "ACTIVE") &&
+        result.data.subscriptionEndsAt &&
+        daysUntil(result.data.subscriptionEndsAt) <= EXPIRY_WARNING_DAYS
+      ) {
+        setShowExpiryWarning(true);
+      }
+    });
+  }, [user?.role]);
+
+  const daysLeft = subscription?.subscriptionEndsAt ? daysUntil(subscription.subscriptionEndsAt) : null;
+  const isExpiringSoon = daysLeft !== null && daysLeft <= EXPIRY_WARNING_DAYS;
 
   return (
     <View className="flex-1" style={{ backgroundColor: colors.bg, paddingTop: insets.top }}>
@@ -48,10 +79,18 @@ export default function PosScreen() {
           {user?.role === "OWNER" && (
             <Pressable
               onPress={() => router.push("/subscription")}
-              className="h-8 w-8 items-center justify-center rounded-full"
-              style={{ backgroundColor: colors.raised }}
+              className="flex-row items-center gap-1.5 rounded-full px-3 py-1.5"
+              style={{
+                backgroundColor: isExpiringSoon ? colors.dangerSoft : colors.raised,
+              }}
             >
-              <CreditCard size={16} color={colors.text} />
+              <CreditCard size={14} color={isExpiringSoon ? colors.danger : colors.text} />
+              <Text
+                className="font-ui-medium text-[11px]"
+                style={{ color: isExpiringSoon ? colors.danger : colors.text }}
+              >
+                {daysLeft !== null ? `เหลือ ${daysLeft} วัน` : "แพ็กเกจ"}
+              </Text>
             </Pressable>
           )}
           <Pressable
@@ -96,6 +135,39 @@ export default function PosScreen() {
           <CartRail />
         </View>
       </View>
+
+      {showExpiryWarning && daysLeft !== null && (
+        <View
+          className="absolute inset-0 items-center justify-center px-8"
+          style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
+        >
+          <View
+            className="w-full max-w-sm gap-3 rounded-2xl border p-5"
+            style={{ borderColor: colors.border, backgroundColor: colors.card }}
+          >
+            <Text className="font-serif text-[17px] text-text">
+              {daysLeft <= 0 ? "แพ็กเกจของร้านหมดอายุแล้ว" : `แพ็กเกจของร้านใกล้หมดอายุ`}
+            </Text>
+            <Text className="text-[13px] text-muted2">
+              {daysLeft <= 0 ? "กรุณาต่ออายุแพ็กเกจเพื่อใช้งานต่อ" : `เหลืออีก ${daysLeft} วัน กรุณาต่ออายุเพื่อไม่ให้ร้านถูกระงับ`}
+            </Text>
+            <View className="flex-row gap-2 pt-1">
+              <Button variant="secondary" className="flex-1" onPress={() => setShowExpiryWarning(false)}>
+                ปิด
+              </Button>
+              <Button
+                className="flex-1"
+                onPress={() => {
+                  setShowExpiryWarning(false);
+                  router.push("/subscription");
+                }}
+              >
+                ต่ออายุตอนนี้
+              </Button>
+            </View>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
