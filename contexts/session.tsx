@@ -14,7 +14,12 @@ export interface SessionUser {
 function decodeUser(token: string): SessionUser | null {
   try {
     const payloadSegment = token.split(".")[1];
-    const json = atob(payloadSegment.replace(/-/g, "+").replace(/_/g, "/"));
+    // atob() returns a binary string (one JS char per byte, Latin-1), not UTF-8 text - decoding
+    // it directly with JSON.parse mangles any non-ASCII characters (Thai names, in this app's
+    // case). Re-interpret those bytes as UTF-8 before parsing.
+    const binary = atob(payloadSegment.replace(/-/g, "+").replace(/_/g, "/"));
+    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+    const json = new TextDecoder().decode(bytes);
     const payload = JSON.parse(json);
     return { id: payload.sub, shopId: payload.shopId, role: payload.role, name: payload.name };
   } catch {

@@ -40,7 +40,7 @@ export default function PosScreen() {
             </View>
           )}
           <View>
-            <Text className="font-serif text-[15px] text-text leading-tight">{state.shop?.name ?? "POS ขายบริการ"}</Text>
+            <Text className="font-serif text-[15px] text-text leading-tight">{state.shop?.name ?? "POS Services"}</Text>
             <Text className="text-[11px] text-muted2">เลือกบริการ · {user?.name}</Text>
           </View>
         </View>

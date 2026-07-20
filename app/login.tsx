@@ -22,7 +22,9 @@ export default function LoginScreen() {
   const { signIn } = useSession();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { email: "", password: "" },
+    // Prefilled with the seeded cashier account for easy local testing - fine for now since
+    // this app isn't distributed anywhere yet; remove before any real build ships.
+    defaultValues: { email: "cashier@possystem.local", password: "cashier1234" },
   });
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
@@ -49,7 +51,7 @@ export default function LoginScreen() {
             <Sparkle size={26} color={colors.accentText} />
           </View>
           <View className="items-center">
-            <Text className="font-serif text-2xl text-text">POS ขายบริการ</Text>
+            <Text className="font-serif text-2xl text-text">POS Services</Text>
             <Text className="mt-1 font-ui text-[13px] text-muted">ระบบขายบริการ · เข้าสู่ระบบพนักงาน</Text>
           </View>
         </View>

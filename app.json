@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "POS ขายบริการ",
+    "name": "POS Services",
     "slug": "pos-mobile-app",
     "scheme": "posmobileapp",
     "version": "1.0.0",
@@ -28,7 +28,7 @@
       [
         "expo-secure-store",
         {
-          "faceIDPermission": "Allow POS ขายบริการ to access your credentials."
+          "faceIDPermission": "Allow POS Services to access your credentials."
         }
       ],
       [
