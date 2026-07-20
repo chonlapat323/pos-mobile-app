@@ -11,8 +11,7 @@ import { ServiceStep } from "@/components/pos/service-step";
 import { Button } from "@/components/ui/button";
 import { usePosCart } from "@/contexts/pos-cart";
 import { useSession } from "@/contexts/session";
-import { getMySubscription } from "@/lib/pos-api";
-import type { MySubscription } from "@/lib/pos-types";
+import { useSubscriptionStatus } from "@/contexts/subscription";
 import { colors } from "@/lib/theme";
 
 const EXPIRY_WARNING_DAYS = 7;
@@ -24,27 +23,23 @@ function daysUntil(dateIso: string) {
 export default function PosScreen() {
   const { user, signOut } = useSession();
   const { state } = usePosCart();
+  const { subscription } = useSubscriptionStatus();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const isWide = width >= 820;
 
-  const [subscription, setSubscription] = useState<MySubscription | null>(null);
   const [showExpiryWarning, setShowExpiryWarning] = useState(false);
 
   useEffect(() => {
-    if (user?.role !== "OWNER") return;
-    void getMySubscription().then((result) => {
-      if (!result.success) return;
-      setSubscription(result.data);
-      if (
-        (result.data.subscriptionStatus === "TRIALING" || result.data.subscriptionStatus === "ACTIVE") &&
-        result.data.subscriptionEndsAt &&
-        daysUntil(result.data.subscriptionEndsAt) <= EXPIRY_WARNING_DAYS
-      ) {
-        setShowExpiryWarning(true);
-      }
-    });
-  }, [user?.role]);
+    if (
+      subscription &&
+      (subscription.subscriptionStatus === "TRIALING" || subscription.subscriptionStatus === "ACTIVE") &&
+      subscription.subscriptionEndsAt &&
+      daysUntil(subscription.subscriptionEndsAt) <= EXPIRY_WARNING_DAYS
+    ) {
+      setShowExpiryWarning(true);
+    }
+  }, [subscription]);
 
   const daysLeft = subscription?.subscriptionEndsAt ? daysUntil(subscription.subscriptionEndsAt) : null;
   const isExpiringSoon = daysLeft !== null && daysLeft <= EXPIRY_WARNING_DAYS;

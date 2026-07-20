@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { useSession } from "@/contexts/session";
+import { useSubscriptionStatus } from "@/contexts/subscription";
 import { getMySubscription, getPurchaseStatus, getSubscriptionPackages, purchaseSubscription } from "@/lib/pos-api";
 import type { MySubscription, PackageCode, SubscriptionPackage, SubscriptionPurchase } from "@/lib/pos-types";
 import { colors } from "@/lib/theme";
@@ -38,6 +39,7 @@ function statusColorFor(status: MySubscription["subscriptionStatus"] | undefined
 
 export default function SubscriptionScreen() {
   const { user } = useSession();
+  const { refresh: refreshSharedSubscription } = useSubscriptionStatus();
   const insets = useSafeAreaInsets();
 
   const [loading, setLoading] = useState(true);
@@ -98,6 +100,7 @@ export default function SubscriptionScreen() {
         setPurchase(null);
         toast.success("ชำระเงินสำเร็จ ต่ออายุแพ็กเกจแล้ว");
         void load();
+        refreshSharedSubscription();
       } else if (statusResult.data.status === "FAILED") {
         if (pollRef.current) clearInterval(pollRef.current);
         setPurchase(null);
