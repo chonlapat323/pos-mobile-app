@@ -4,7 +4,7 @@
     "slug": "pos-mobile-app",
     "scheme": "posmobileapp",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "ios": {
@@ -31,7 +31,17 @@
           "faceIDPermission": "Allow POS ขายบริการ to access your credentials."
         }
       ],
-      "expo-splash-screen",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#16151a",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "dark": {
+            "backgroundColor": "#16151a"
+          }
+        }
+      ],
       "expo-image"
     ],
     "experiments": {

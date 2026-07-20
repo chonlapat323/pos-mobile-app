@@ -1,36 +1,30 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# pos-mobile-app
 
-## Getting Started
+The staff-facing POS checkout app for POS Services — an Expo (React Native) app, built with Expo Router and NativeWind.
 
-First, run the development server:
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npx expo start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Scan the QR code with Expo Go (Android/iOS), or run on a simulator/emulator:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run android
+npm run ios
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Set `EXPO_PUBLIC_API_URL` in `.env.local` to point at the backend (`http://localhost:3010` by default). Android emulator needs `http://10.0.2.2:3010` instead of `localhost`; a physical device via Expo Go needs the host machine's LAN IP.
 
-## Learn More
+## Structure
 
-To learn more about Next.js, take a look at the following resources:
+- `app/` — Expo Router routes. `login.tsx` (public) and `(app)/` (protected group: `index.tsx` POS screen, `member.tsx`/`history.tsx`/`success.tsx` modal routes) are gated in `app/_layout.tsx` via `Stack.Protected`.
+- `contexts/` — `session.tsx` (auth: JWT in `expo-secure-store`), `pos-cart.tsx` (the checkout reducer, shared across the `(app)` group).
+- `components/pos/` — POS screen building blocks. `components/ui/` — custom Button/TextField/Toast primitives (NativeWind-styled, no component library).
+- `lib/` — `api.ts`/`pos-api.ts` (backend calls), `pos-types.ts` (data shapes), `theme.ts` (design tokens, kept in sync with `tailwind.config.js`).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Building
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`eas.json` has `development`/`preview`/`production` profiles. `npx eas build --profile preview --platform android` for an installable APK.
