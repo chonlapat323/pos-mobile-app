@@ -1,13 +1,29 @@
 import { ApiError, apiFetch, type PaginatedResult } from "./api";
-import type { Bill, BillHistoryItem, Category, Member, PaymentMethod, Service, Shop } from "./pos-types";
+import type {
+  Bill,
+  BillHistoryItem,
+  Category,
+  Member,
+  MySubscription,
+  PaymentMethod,
+  PurchaseStatus,
+  Service,
+  Shop,
+  SubscriptionPackage,
+  SubscriptionPurchase,
+} from "./pos-types";
 
 type MembersResult = { success: true; data: Member[] } | { success: false; error: string };
 type MemberResult = { success: true; data: Member } | { success: false; error: string };
-type CategoriesResult = { success: true; data: Category[] } | { success: false; error: string };
+type CategoriesResult = { success: true; data: Category[] } | { success: false; error: string; status?: number };
 type ServicesResult = { success: true; data: Service[] } | { success: false; error: string };
-type ShopResult = { success: true; data: Shop } | { success: false; error: string };
+type ShopResult = { success: true; data: Shop } | { success: false; error: string; status?: number };
 type BillResult = { success: true; data: Bill } | { success: false; error: string };
 type BillsResult = { success: true; data: PaginatedResult<BillHistoryItem> } | { success: false; error: string };
+type PackagesResult = { success: true; data: SubscriptionPackage[] } | { success: false; error: string };
+type MySubscriptionResult = { success: true; data: MySubscription } | { success: false; error: string };
+type PurchaseResult = { success: true; data: SubscriptionPurchase } | { success: false; error: string };
+type PurchaseStatusResult = { success: true; data: { status: PurchaseStatus } } | { success: false; error: string };
 
 export async function searchMembers(search: string): Promise<MembersResult> {
   try {
@@ -32,7 +48,11 @@ export async function getCategories(): Promise<CategoriesResult> {
     const data = await apiFetch<Category[]>("/service-categories/select");
     return { success: true, data };
   } catch (error) {
-    return { success: false, error: error instanceof ApiError ? error.message : "โหลดกลุ่มบริการไม่สำเร็จ" };
+    return {
+      success: false,
+      error: error instanceof ApiError ? error.message : "โหลดกลุ่มบริการไม่สำเร็จ",
+      status: error instanceof ApiError ? error.status : undefined,
+    };
   }
 }
 
@@ -54,7 +74,11 @@ export async function getShopConfig(): Promise<ShopResult> {
     const data = await apiFetch<Shop>("/shop");
     return { success: true, data };
   } catch (error) {
-    return { success: false, error: error instanceof ApiError ? error.message : "โหลดข้อมูลร้านไม่สำเร็จ" };
+    return {
+      success: false,
+      error: error instanceof ApiError ? error.message : "โหลดข้อมูลร้านไม่สำเร็จ",
+      status: error instanceof ApiError ? error.status : undefined,
+    };
   }
 }
 
@@ -90,5 +114,44 @@ export async function createBill(input: {
     return { success: true, data };
   } catch (error) {
     return { success: false, error: error instanceof ApiError ? error.message : "ชำระเงินไม่สำเร็จ" };
+  }
+}
+
+export async function getSubscriptionPackages(): Promise<PackagesResult> {
+  try {
+    const data = await apiFetch<SubscriptionPackage[]>("/subscriptions/packages");
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: error instanceof ApiError ? error.message : "โหลดแพ็กเกจไม่สำเร็จ" };
+  }
+}
+
+export async function getMySubscription(): Promise<MySubscriptionResult> {
+  try {
+    const data = await apiFetch<MySubscription>("/subscriptions/me");
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: error instanceof ApiError ? error.message : "โหลดสถานะแพ็กเกจไม่สำเร็จ" };
+  }
+}
+
+export async function purchaseSubscription(packageId: string): Promise<PurchaseResult> {
+  try {
+    const data = await apiFetch<SubscriptionPurchase>("/subscriptions/purchase", {
+      method: "POST",
+      body: JSON.stringify({ packageId }),
+    });
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: error instanceof ApiError ? error.message : "สร้างรายการชำระเงินไม่สำเร็จ" };
+  }
+}
+
+export async function getPurchaseStatus(paymentId: string): Promise<PurchaseStatusResult> {
+  try {
+    const data = await apiFetch<{ status: PurchaseStatus }>(`/subscriptions/purchase/${paymentId}/status`);
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: error instanceof ApiError ? error.message : "ตรวจสอบสถานะไม่สำเร็จ" };
   }
 }

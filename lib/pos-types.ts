@@ -61,3 +61,30 @@ export interface BillHistoryItem {
   staff: { id: string; name: string };
   items: { id: string; quantity: number; priceAtSale: string; service: { id: string; name: string } }[];
 }
+
+export type PackageCode = "TRIAL_60" | "SIX_MONTH" | "ONE_YEAR";
+
+export interface SubscriptionPackage {
+  id: string;
+  code: PackageCode;
+  name: string;
+  priceThb: number;
+  durationDays: number;
+  isTrial: boolean;
+}
+
+export interface MySubscription {
+  subscriptionStatus: "PENDING" | "TRIALING" | "ACTIVE" | "EXPIRED";
+  subscriptionEndsAt: string | null;
+  isActive: boolean;
+  trialUsed: boolean;
+  currentPackage: SubscriptionPackage | null;
+}
+
+export interface SubscriptionPurchase {
+  paymentId: string;
+  qrImageUri: string;
+  expiresAt: string;
+}
+
+export type PurchaseStatus = "PENDING" | "PAID" | "FAILED";

@@ -30,7 +30,10 @@ function decodeUser(token: string): SessionUser | null {
 interface SessionContextValue {
   user: SessionUser | null;
   isLoading: boolean;
-  signIn: (email: string, password: string) => Promise<{ success: true } | { success: false; error: string }>;
+  signIn: (
+    email: string,
+    password: string,
+  ) => Promise<{ success: true; subscriptionExpired: boolean } | { success: false; error: string }>;
   signOut: () => void;
 }
 
@@ -66,10 +69,10 @@ export function SessionProvider({ children }: PropsWithChildren) {
         return { success: false as const, error: body?.message ?? "เข้าสู่ระบบไม่สำเร็จ" };
       }
 
-      const data = (await res.json()) as { accessToken: string };
+      const data = (await res.json()) as { accessToken: string; subscriptionExpired?: boolean };
       await setToken(data.accessToken);
       setUser(decodeUser(data.accessToken));
-      return { success: true as const };
+      return { success: true as const, subscriptionExpired: data.subscriptionExpired ?? false };
     } catch {
       return { success: false as const, error: "ไม่สามารถเชื่อมต่อ pos-backend ได้" };
     }

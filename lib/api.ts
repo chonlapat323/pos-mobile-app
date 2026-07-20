@@ -13,6 +13,7 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public status: number,
+    public reason?: string,
   ) {
     super(message);
   }
@@ -32,7 +33,7 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
 
   if (!res.ok) {
     const body = await res.json().catch(() => null);
-    throw new ApiError(body?.message ?? `Request to ${path} failed with ${res.status}`, res.status);
+    throw new ApiError(body?.message ?? `Request to ${path} failed with ${res.status}`, res.status, body?.reason);
   }
 
   if (res.status === 204) return undefined as T;

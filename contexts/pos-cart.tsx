@@ -118,12 +118,14 @@ export function PosCartProvider({ children }: PropsWithChildren) {
       const [categoriesResult, shopResult] = await Promise.all([getCategories(), getShopConfig()]);
       if (categoriesResult.success) {
         dispatch({ type: "SET_CATEGORIES", categories: categoriesResult.data });
-      } else {
+      } else if (categoriesResult.status !== 401) {
+        // A 401 here means the shop is suspended/expired - the login screen or the
+        // subscription screen already surfaces that, so don't pile on a second toast.
         toast.danger(categoriesResult.error);
       }
       if (shopResult.success) {
         dispatch({ type: "SET_SHOP", shop: shopResult.data });
-      } else {
+      } else if (shopResult.status !== 401) {
         toast.danger(shopResult.error);
       }
     }

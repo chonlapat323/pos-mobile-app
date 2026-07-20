@@ -11,6 +11,7 @@ export default function AppLayout() {
         <Stack.Screen name="member" options={{ presentation: "modal" }} />
         <Stack.Screen name="history" options={{ presentation: "modal" }} />
         <Stack.Screen name="success" options={{ presentation: "modal", gestureEnabled: false }} />
+        <Stack.Screen name="subscription" options={{ presentation: "modal" }} />
       </Stack>
     </PosCartProvider>
   );

@@ -33,6 +33,11 @@ export default function LoginScreen() {
       toast.danger(result.error);
       return;
     }
+    if (result.subscriptionExpired) {
+      toast.danger("แพ็กเกจของร้านหมดอายุแล้ว กรุณาต่ออายุเพื่อใช้งานต่อ");
+      router.replace("/subscription");
+      return;
+    }
     router.replace("/");
   }
 

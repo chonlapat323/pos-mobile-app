@@ -2,7 +2,7 @@ import { Pressable, Text, useWindowDimensions, View } from "react-native";
 
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { History, LogOut, Sparkle, User } from "lucide-react-native";
+import { CreditCard, History, LogOut, Sparkle, User } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CartRail } from "@/components/pos/cart-rail";
@@ -45,6 +45,15 @@ export default function PosScreen() {
           </View>
         </View>
         <View className="flex-row items-center gap-2">
+          {user?.role === "OWNER" && (
+            <Pressable
+              onPress={() => router.push("/subscription")}
+              className="h-8 w-8 items-center justify-center rounded-full"
+              style={{ backgroundColor: colors.raised }}
+            >
+              <CreditCard size={16} color={colors.text} />
+            </Pressable>
+          )}
           <Pressable
             onPress={() => router.push("/member")}
             className="flex-row items-center gap-1.5 rounded-full px-3 py-1.5"
