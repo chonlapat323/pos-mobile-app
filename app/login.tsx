@@ -22,9 +22,9 @@ export default function LoginScreen() {
   const { signIn } = useSession();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    // Prefilled with the seeded cashier account for easy local testing - fine for now since
+    // Prefilled with the seeded owner account for easy local testing - fine for now since
     // this app isn't distributed anywhere yet; remove before any real build ships.
-    defaultValues: { email: "cashier@possystem.local", password: "cashier1234" },
+    defaultValues: { email: "admin@possystem.local", password: "admin1234" },
   });
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
