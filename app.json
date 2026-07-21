@@ -42,7 +42,14 @@
           }
         }
       ],
-      "expo-image"
+      "expo-image",
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "อนุญาตให้ POS Services เข้าถึงกล้องเพื่อถ่ายรูปก่อน-หลังของลูกค้า",
+          "microphonePermission": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

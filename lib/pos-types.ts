@@ -83,8 +83,9 @@ export interface MySubscription {
 
 export interface SubscriptionPurchase {
   paymentId: string;
-  qrImageUri: string;
-  expiresAt: string;
+  qrImageUri: string | null;
+  expiresAt: string | null;
+  authorizeUri: string | null;
 }
 
 export type PurchaseStatus = "PENDING" | "PAID" | "FAILED";
@@ -97,4 +98,15 @@ export interface SubscriptionHistoryEntry {
   createdAt: string;
   package: SubscriptionPackage;
   payments: { id: string; amountThb: number; status: PurchaseStatus; paidAt: string | null }[];
+}
+
+export type PhotoType = "BEFORE" | "AFTER";
+
+export interface VisitPhoto {
+  id: string;
+  billId: string | null;
+  memberId: string;
+  type: PhotoType;
+  imageUrl: string;
+  createdAt: string;
 }

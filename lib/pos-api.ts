@@ -1,4 +1,4 @@
-import { ApiError, apiFetch, type PaginatedResult } from "./api";
+import { ApiError, apiFetch, apiUpload, type PaginatedResult } from "./api";
 import type {
   Bill,
   BillHistoryItem,
@@ -6,12 +6,14 @@ import type {
   Member,
   MySubscription,
   PaymentMethod,
+  PhotoType,
   PurchaseStatus,
   Service,
   Shop,
   SubscriptionHistoryEntry,
   SubscriptionPackage,
   SubscriptionPurchase,
+  VisitPhoto,
 } from "./pos-types";
 
 type MembersResult = { success: true; data: Member[] } | { success: false; error: string };
@@ -28,6 +30,8 @@ type PurchaseStatusResult = { success: true; data: { status: PurchaseStatus } } 
 type SubscriptionHistoryResult =
   | { success: true; data: SubscriptionHistoryEntry[] }
   | { success: false; error: string };
+type UploadResult = { success: true; data: { url: string } } | { success: false; error: string };
+type VisitPhotoResult = { success: true; data: VisitPhoto } | { success: false; error: string };
 
 export async function searchMembers(search: string): Promise<MembersResult> {
   try {
@@ -139,11 +143,18 @@ export async function getMySubscription(): Promise<MySubscriptionResult> {
   }
 }
 
-export async function purchaseSubscription(packageId: string): Promise<PurchaseResult> {
+export async function purchaseSubscription(
+  packageId: string,
+  payment: { method: "PROMPTPAY" } | { method: "CARD"; omiseToken: string },
+): Promise<PurchaseResult> {
   try {
     const data = await apiFetch<SubscriptionPurchase>("/subscriptions/purchase", {
       method: "POST",
-      body: JSON.stringify({ packageId }),
+      body: JSON.stringify({
+        packageId,
+        paymentMethod: payment.method,
+        omiseToken: payment.method === "CARD" ? payment.omiseToken : undefined,
+      }),
     });
     return { success: true, data };
   } catch (error) {
@@ -166,5 +177,35 @@ export async function getSubscriptionHistory(): Promise<SubscriptionHistoryResul
     return { success: true, data };
   } catch (error) {
     return { success: false, error: error instanceof ApiError ? error.message : "โหลดประวัติการชำระเงินไม่สำเร็จ" };
+  }
+}
+
+export async function uploadImage(uri: string): Promise<UploadResult> {
+  try {
+    const data = await apiUpload<{ url: string }>("/uploads", {
+      uri,
+      name: `visit-photo-${Date.now()}.jpg`,
+      type: "image/jpeg",
+    });
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: error instanceof ApiError ? error.message : "อัปโหลดรูปไม่สำเร็จ" };
+  }
+}
+
+export async function createVisitPhoto(input: {
+  memberId: string;
+  type: PhotoType;
+  imageUrl: string;
+  billId?: string;
+}): Promise<VisitPhotoResult> {
+  try {
+    const data = await apiFetch<VisitPhoto>("/photos", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: error instanceof ApiError ? error.message : "บันทึกรูปไม่สำเร็จ" };
   }
 }

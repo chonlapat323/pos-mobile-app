@@ -1,14 +1,76 @@
-import { ScrollView, Text, View } from "react-native";
+import { useState } from "react";
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 
+import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import { CheckCircle2 } from "lucide-react-native";
+import { Camera, CheckCircle2 } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ReceiptView } from "@/components/pos/receipt-view";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
 import { usePosCart } from "@/contexts/pos-cart";
 import { useSession } from "@/contexts/session";
+import { createVisitPhoto, uploadImage } from "@/lib/pos-api";
+import type { PhotoType } from "@/lib/pos-types";
 import { colors } from "@/lib/theme";
+
+const PHOTO_TYPE_LABELS: Record<PhotoType, string> = { BEFORE: "ถ่ายรูปก่อน", AFTER: "ถ่ายรูปหลัง" };
+
+function VisitPhotoButton({ type, memberId, billId }: { type: PhotoType; memberId: string; billId: string }) {
+  const [status, setStatus] = useState<"idle" | "uploading" | "done">("idle");
+
+  async function capture() {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permission.granted) {
+      toast.danger("กรุณาอนุญาตให้แอปเข้าถึงกล้องก่อน");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({ mediaTypes: ["images"], quality: 0.6 });
+    if (result.canceled || !result.assets[0]) return;
+
+    setStatus("uploading");
+    const uploaded = await uploadImage(result.assets[0].uri);
+    if (!uploaded.success) {
+      toast.danger(uploaded.error);
+      setStatus("idle");
+      return;
+    }
+
+    const photo = await createVisitPhoto({ memberId, type, imageUrl: uploaded.data.url, billId });
+    if (!photo.success) {
+      toast.danger(photo.error);
+      setStatus("idle");
+      return;
+    }
+
+    setStatus("done");
+    toast.success(`บันทึกรูป${type === "BEFORE" ? "ก่อน" : "หลัง"}แล้ว`);
+  }
+
+  return (
+    <Pressable
+      onPress={capture}
+      disabled={status === "uploading"}
+      className="flex-1 flex-row items-center justify-center gap-2 rounded-lg border py-3"
+      style={{
+        borderColor: colors.borderMid,
+        backgroundColor: status === "done" ? colors.successSoft : colors.raised,
+        opacity: status === "uploading" ? 0.6 : 1,
+      }}
+    >
+      {status === "uploading" ? (
+        <ActivityIndicator color={colors.text} />
+      ) : (
+        <Camera size={16} color={status === "done" ? colors.success : colors.text} />
+      )}
+      <Text className="font-ui-medium text-[13px]" style={{ color: status === "done" ? colors.success : colors.text }}>
+        {status === "done" ? "บันทึกแล้ว" : PHOTO_TYPE_LABELS[type]}
+      </Text>
+    </Pressable>
+  );
+}
 
 export default function SuccessScreen() {
   const { user } = useSession();
@@ -73,6 +135,16 @@ export default function SuccessScreen() {
         pointEarned={bill.pointEarned}
         pointBalanceAfter={newBalance}
       />
+
+      {member && (
+        <View className="gap-2">
+          <Text className="font-ui-medium text-[13px] text-muted2">แนบรูปก่อน-หลัง (ถ้ามี)</Text>
+          <View className="flex-row gap-2">
+            <VisitPhotoButton type="BEFORE" memberId={member.id} billId={bill.id} />
+            <VisitPhotoButton type="AFTER" memberId={member.id} billId={bill.id} />
+          </View>
+        </View>
+      )}
 
       <Button fullWidth onPress={newTransaction}>
         เริ่มรายการใหม่
