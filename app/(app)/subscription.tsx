@@ -1,17 +1,31 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Image, Pressable, ScrollView, Text, View } from "react-native";
+import { Image, Linking, Pressable, ScrollView, Text, View } from "react-native";
 
 import { router } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Button } from "@/components/ui/button";
+import { TextField } from "@/components/ui/text-field";
 import { toast } from "@/components/ui/toast";
 import { useSession } from "@/contexts/session";
 import { useSubscriptionStatus } from "@/contexts/subscription";
+import { createOmiseToken } from "@/lib/omise";
 import { getMySubscription, getPurchaseStatus, getSubscriptionPackages, purchaseSubscription } from "@/lib/pos-api";
 import type { MySubscription, PackageCode, SubscriptionPackage, SubscriptionPurchase } from "@/lib/pos-types";
 import { colors } from "@/lib/theme";
+
+type PaymentMethod = "PROMPTPAY" | "CARD";
+
+function formatCardNumber(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 16);
+  return (digits.match(/.{1,4}/g) ?? []).join(" ");
+}
+
+function formatExpiry(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 4);
+  return digits.length <= 2 ? digits : `${digits.slice(0, 2)}/${digits.slice(2)}`;
+}
 
 const STATUS_LABELS: Record<MySubscription["subscriptionStatus"], string> = {
   PENDING: "รอชำระเงิน",
@@ -57,6 +71,11 @@ export default function SubscriptionScreen() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [purchasing, setPurchasing] = useState(false);
   const [purchase, setPurchase] = useState<SubscriptionPurchase | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("PROMPTPAY");
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardName, setCardName] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvv, setCardCvv] = useState("");
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const load = useCallback(async () => {
@@ -90,19 +109,9 @@ export default function SubscriptionScreen() {
     };
   }, []);
 
-  async function handleSubscribe() {
-    if (!selectedId) return;
-    setPurchasing(true);
-    const result = await purchaseSubscription(selectedId);
-    setPurchasing(false);
-    if (!result.success) {
-      toast.danger(result.error);
-      return;
-    }
-    setPurchase(result.data);
-
+  function startPolling(paymentId: string) {
     pollRef.current = setInterval(async () => {
-      const statusResult = await getPurchaseStatus(result.data.paymentId);
+      const statusResult = await getPurchaseStatus(paymentId);
       if (!statusResult.success) return;
       if (statusResult.data.status === "PAID") {
         if (pollRef.current) clearInterval(pollRef.current);
@@ -116,6 +125,53 @@ export default function SubscriptionScreen() {
         toast.danger("การชำระเงินไม่สำเร็จ กรุณาลองใหม่");
       }
     }, 3000);
+  }
+
+  async function handleSubscribe() {
+    if (!selectedId) return;
+
+    let omiseToken: string | null = null;
+    if (paymentMethod === "CARD") {
+      const [month, year] = cardExpiry.split("/");
+      if (!cardNumber || !cardName || !month || !year || !cardCvv) {
+        toast.danger("กรุณากรอกข้อมูลบัตรให้ครบ");
+        return;
+      }
+      setPurchasing(true);
+      try {
+        omiseToken = await createOmiseToken({
+          number: cardNumber,
+          name: cardName,
+          expirationMonth: Number(month),
+          expirationYear: 2000 + Number(year),
+          securityCode: cardCvv,
+        });
+      } catch (error) {
+        setPurchasing(false);
+        toast.danger(error instanceof Error ? error.message : "ไม่สามารถอ่านข้อมูลบัตรได้");
+        return;
+      }
+    } else {
+      setPurchasing(true);
+    }
+
+    const result = await purchaseSubscription(
+      selectedId,
+      omiseToken ? { method: "CARD", omiseToken } : { method: "PROMPTPAY" },
+    );
+    setPurchasing(false);
+    if (!result.success) {
+      toast.danger(result.error);
+      return;
+    }
+
+    if (result.data.authorizeUri) {
+      // 3D Secure required - the card issuer needs to confirm this in their own page before the
+      // charge resolves. Send the owner there, then poll the same way as everything else.
+      void Linking.openURL(result.data.authorizeUri);
+    }
+    setPurchase(result.data);
+    startPolling(result.data.paymentId);
   }
 
   const selectedPackage = packages.find((p) => p.id === selectedId) ?? null;
@@ -138,10 +194,18 @@ export default function SubscriptionScreen() {
         className="flex-1 items-center justify-center gap-5 px-6"
         style={{ backgroundColor: colors.bg, paddingTop: insets.top }}
       >
-        <Text className="font-serif text-[18px] text-text">สแกน QR เพื่อชำระผ่าน PromptPay</Text>
-        <View className="rounded-2xl p-4" style={{ backgroundColor: colors.receiptPaper }}>
-          <Image source={{ uri: purchase.qrImageUri }} style={{ width: 240, height: 240 }} resizeMode="contain" />
-        </View>
+        {purchase.qrImageUri ? (
+          <>
+            <Text className="font-serif text-[18px] text-text">สแกน QR เพื่อชำระผ่าน PromptPay</Text>
+            <View className="rounded-2xl p-4" style={{ backgroundColor: colors.receiptPaper }}>
+              <Image source={{ uri: purchase.qrImageUri }} style={{ width: 240, height: 240 }} resizeMode="contain" />
+            </View>
+          </>
+        ) : (
+          <Text className="font-serif text-[18px] text-text">
+            {purchase.authorizeUri ? "กรุณายืนยันตัวตนกับธนาคารในหน้าที่เปิดขึ้น" : "กำลังตรวจสอบการชำระเงิน..."}
+          </Text>
+        )}
         <Text className="text-center text-[12px] text-muted">ระบบจะอัปเดตสถานะอัตโนมัติเมื่อชำระเงินสำเร็จ กรุณาอย่าปิดหน้านี้</Text>
         <Button
           variant="secondary"
@@ -273,6 +337,69 @@ export default function SubscriptionScreen() {
                     </Pressable>
                   );
                 })}
+
+                <View className="gap-2 pt-2">
+                  <Text className="font-ui-semibold text-[13px] text-text">วิธีชำระเงิน</Text>
+                  <View className="flex-row gap-2">
+                    <Pressable
+                      onPress={() => setPaymentMethod("PROMPTPAY")}
+                      className="flex-1 items-center rounded-lg border py-2.5"
+                      style={{
+                        borderColor: paymentMethod === "PROMPTPAY" ? colors.accent : colors.border,
+                        borderWidth: paymentMethod === "PROMPTPAY" ? 2 : 1,
+                        backgroundColor: colors.card,
+                      }}
+                    >
+                      <Text className="font-ui-medium text-[13px] text-text">พร้อมเพย์ (QR)</Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => setPaymentMethod("CARD")}
+                      className="flex-1 items-center rounded-lg border py-2.5"
+                      style={{
+                        borderColor: paymentMethod === "CARD" ? colors.accent : colors.border,
+                        borderWidth: paymentMethod === "CARD" ? 2 : 1,
+                        backgroundColor: colors.card,
+                      }}
+                    >
+                      <Text className="font-ui-medium text-[13px] text-text">บัตรเครดิต/เดบิต</Text>
+                    </Pressable>
+                  </View>
+
+                  {paymentMethod === "CARD" && (
+                    <View className="gap-3 pt-1">
+                      <TextField
+                        label="หมายเลขบัตร"
+                        placeholder="4242 4242 4242 4242"
+                        keyboardType="number-pad"
+                        value={cardNumber}
+                        onChangeText={(text) => setCardNumber(formatCardNumber(text))}
+                      />
+                      <TextField label="ชื่อบนบัตร" placeholder="ชื่อ-นามสกุล" value={cardName} onChangeText={setCardName} />
+                      <View className="flex-row gap-3">
+                        <View className="flex-1">
+                          <TextField
+                            label="วันหมดอายุ"
+                            placeholder="MM/YY"
+                            keyboardType="number-pad"
+                            value={cardExpiry}
+                            onChangeText={(text) => setCardExpiry(formatExpiry(text))}
+                          />
+                        </View>
+                        <View className="flex-1">
+                          <TextField
+                            label="CVV"
+                            placeholder="123"
+                            keyboardType="number-pad"
+                            secureTextEntry
+                            maxLength={4}
+                            value={cardCvv}
+                            onChangeText={setCardCvv}
+                          />
+                        </View>
+                      </View>
+                    </View>
+                  )}
+                </View>
               </>
             )}
           </>
