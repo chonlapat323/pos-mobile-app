@@ -1,5 +1,9 @@
-import { createContext, type PropsWithChildren, use, useCallback, useEffect, useState } from "react";
+import { createContext, type PropsWithChildren, use, useCallback, useEffect, useRef, useState } from "react";
 
+import { router } from "expo-router";
+
+import { toast } from "@/components/ui/toast";
+import { setShopSuspendedListener } from "@/lib/api";
 import { clearToken, getToken, setToken } from "@/lib/auth-storage";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3010";
@@ -82,6 +86,33 @@ export function SessionProvider({ children }: PropsWithChildren) {
     void clearToken();
     setUser(null);
   }, []);
+
+  const userRef = useRef(user);
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
+
+  // Fires from apiFetch() the instant ANY request - not just a dedicated poll - discovers the
+  // shop was suspended after this session already logged in (eg. a platform admin cancelled its
+  // subscription while the app was open). An owner suspended only for a lapsed subscription can
+  // still reach the purchase screen; every other case (staff, or a manual admin suspension) can't
+  // do anything once suspended, so there's nothing left to do but sign out.
+  useEffect(() => {
+    setShopSuspendedListener((reason) => {
+      if (userRef.current?.role === "OWNER" && reason === "SUBSCRIPTION_EXPIRED") {
+        toast.danger("แพ็กเกจของร้านหมดอายุแล้ว กรุณาต่ออายุเพื่อใช้งานต่อ");
+        router.replace("/subscription");
+        return;
+      }
+      toast.danger(
+        reason === "SUBSCRIPTION_EXPIRED"
+          ? "แพ็กเกจของร้านหมดอายุแล้ว กรุณาติดต่อเจ้าของร้านเพื่อต่ออายุ"
+          : "ร้านถูกระงับการใช้งาน กรุณาติดต่อผู้ดูแลระบบ",
+      );
+      signOut();
+    });
+    return () => setShopSuspendedListener(null);
+  }, [signOut]);
 
   return <SessionContext value={{ user, isLoading, signIn, signOut }}>{children}</SessionContext>;
 }

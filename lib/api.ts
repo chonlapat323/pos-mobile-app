@@ -19,6 +19,18 @@ export class ApiError extends Error {
   }
 }
 
+// A 401 with a `reason` means the strict JwtStrategy blocked the request because the shop itself
+// is suspended (see backend jwt.strategy.ts) - as opposed to a plain expired/invalid token, which
+// carries no `reason`. Registered once from the session context so any api call, anywhere in the
+// app, can force a re-fetch/redirect the moment it discovers the shop's subscription changed
+// underneath an already-open session - not just the screens that poll for it directly.
+type ShopSuspendedListener = (reason: string) => void;
+let shopSuspendedListener: ShopSuspendedListener | null = null;
+
+export function setShopSuspendedListener(listener: ShopSuspendedListener | null) {
+  shopSuspendedListener = listener;
+}
+
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = await getToken();
 
@@ -33,6 +45,9 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
 
   if (!res.ok) {
     const body = await res.json().catch(() => null);
+    if (res.status === 401 && body?.reason) {
+      shopSuspendedListener?.(body.reason);
+    }
     throw new ApiError(body?.message ?? `Request to ${path} failed with ${res.status}`, res.status, body?.reason);
   }
 

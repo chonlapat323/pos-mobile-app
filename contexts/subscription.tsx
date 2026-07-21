@@ -35,5 +35,14 @@ export function SubscriptionProvider({ children }: PropsWithChildren) {
     refresh();
   }, [refresh]);
 
+  // The header pill/popup on index.tsx only update when this refetches - and index.tsx never
+  // unmounts, so an owner sitting on the POS home screen (no other API calls firing) would
+  // otherwise never notice a platform admin changing their package until they happened to
+  // navigate somewhere. Poll periodically to catch that case too.
+  useEffect(() => {
+    const interval = setInterval(refresh, 60_000);
+    return () => clearInterval(interval);
+  }, [refresh]);
+
   return <SubscriptionContext value={{ subscription, refresh }}>{children}</SubscriptionContext>;
 }
