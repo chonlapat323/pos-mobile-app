@@ -46,7 +46,7 @@ eas build --platform android --profile production
 
 **ก่อน build production ต้องแก้ `eas.json` ก่อน**: หา `"production"` profile แล้วเปลี่ยน `EXPO_PUBLIC_OMISE_PUBLIC_KEY` จาก `"CHANGE_ME_TO_LIVE_OMISE_PUBLIC_KEY"` เป็นคีย์โหมด live จริงจาก Omise dashboard (ตอนนี้ยังเป็นคีย์ placeholder อยู่ ถ้าไม่เปลี่ยนแอปจะรับชำระเงินจริงไม่ได้)
 
-ส่วน `EXPO_PUBLIC_API_URL` ตั้งเป็น `https://pos-api.beautyup-enterprise.com` ไว้แล้ว ไม่ต้องแก้ถ้า backend deploy โดเมนนี้
+ส่วน `EXPO_PUBLIC_API_URL` ตั้งเป็น `https://api-pos.beautyup-enterprise.com` ไว้แล้ว ไม่ต้องแก้ถ้า backend deploy โดเมนนี้
 
 ## 5. ส่งขึ้น Play Store
 ```
