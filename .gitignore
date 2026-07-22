@@ -39,3 +39,7 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# local design reference files and old reference scaffold, not part of the app
+*.dc.html
+/react-native
