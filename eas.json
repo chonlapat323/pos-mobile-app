@@ -12,10 +12,18 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://pos-api.beautyup-enterprise.com",
+        "EXPO_PUBLIC_OMISE_PUBLIC_KEY": "pkey_test_67hn9nj36yjg7wlvvuj"
       }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://pos-api.beautyup-enterprise.com",
+        "EXPO_PUBLIC_OMISE_PUBLIC_KEY": "CHANGE_ME_TO_LIVE_OMISE_PUBLIC_KEY"
+      }
     }
   },
   "submit": {
