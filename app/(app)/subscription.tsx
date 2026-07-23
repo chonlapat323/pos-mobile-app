@@ -11,7 +11,13 @@ import { toast } from "@/components/ui/toast";
 import { useSession } from "@/contexts/session";
 import { useSubscriptionStatus } from "@/contexts/subscription";
 import { createOmiseToken } from "@/lib/omise";
-import { getMySubscription, getPurchaseStatus, getSubscriptionPackages, purchaseSubscription } from "@/lib/pos-api";
+import {
+  getMySubscription,
+  getPurchaseStatus,
+  getSubscriptionConfig,
+  getSubscriptionPackages,
+  purchaseSubscription,
+} from "@/lib/pos-api";
 import type { MySubscription, PackageCode, SubscriptionPackage, SubscriptionPurchase } from "@/lib/pos-types";
 import { colors } from "@/lib/theme";
 
@@ -76,11 +82,16 @@ export default function SubscriptionScreen() {
   const [cardName, setCardName] = useState("");
   const [cardExpiry, setCardExpiry] = useState("");
   const [cardCvv, setCardCvv] = useState("");
+  const [omisePublicKey, setOmisePublicKey] = useState<string | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [meResult, packagesResult] = await Promise.all([getMySubscription(), getSubscriptionPackages()]);
+    const [meResult, packagesResult, configResult] = await Promise.all([
+      getMySubscription(),
+      getSubscriptionPackages(),
+      getSubscriptionConfig(),
+    ]);
     setLoading(false);
     if (!meResult.success) {
       toast.danger(meResult.error);
@@ -93,6 +104,9 @@ export default function SubscriptionScreen() {
     setMe(meResult.data);
     setPackages(packagesResult.data);
     setSelectedId((current) => current ?? packagesResult.data.find((p) => p.code === "ONE_YEAR")?.id ?? null);
+    // A missing key here only matters if the owner picks card payment - don't block the whole
+    // screen over it, just leave it null and surface the error when they actually try to pay.
+    if (configResult.success) setOmisePublicKey(configResult.data.omisePublicKey);
   }, []);
 
   useEffect(() => {
@@ -137,15 +151,22 @@ export default function SubscriptionScreen() {
         toast.danger("กรุณากรอกข้อมูลบัตรให้ครบ");
         return;
       }
+      if (!omisePublicKey) {
+        toast.danger("ระบบยังไม่พร้อมรับชำระด้วยบัตร กรุณาลองใหม่ภายหลัง");
+        return;
+      }
       setPurchasing(true);
       try {
-        omiseToken = await createOmiseToken({
-          number: cardNumber,
-          name: cardName,
-          expirationMonth: Number(month),
-          expirationYear: 2000 + Number(year),
-          securityCode: cardCvv,
-        });
+        omiseToken = await createOmiseToken(
+          {
+            number: cardNumber,
+            name: cardName,
+            expirationMonth: Number(month),
+            expirationYear: 2000 + Number(year),
+            securityCode: cardCvv,
+          },
+          omisePublicKey,
+        );
       } catch (error) {
         setPurchasing(false);
         toast.danger(error instanceof Error ? error.message : "ไม่สามารถอ่านข้อมูลบัตรได้");

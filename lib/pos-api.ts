@@ -125,6 +125,19 @@ export async function createBill(input: {
   }
 }
 
+type SubscriptionConfigResult =
+  | { success: true; data: { omisePublicKey: string | null } }
+  | { success: false; error: string };
+
+export async function getSubscriptionConfig(): Promise<SubscriptionConfigResult> {
+  try {
+    const data = await apiFetch<{ omisePublicKey: string | null }>("/subscriptions/config");
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: error instanceof ApiError ? error.message : "โหลดค่าคอนฟิกไม่สำเร็จ" };
+  }
+}
+
 export async function getSubscriptionPackages(): Promise<PackagesResult> {
   try {
     const data = await apiFetch<SubscriptionPackage[]>("/subscriptions/packages");

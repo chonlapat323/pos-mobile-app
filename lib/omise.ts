@@ -2,7 +2,6 @@
 // card number/CVV go straight from this device to Omise and never touch our own backend, which
 // only ever receives the resulting tokn_xxx string.
 const VAULT_URL = "https://vault.omise.co/tokens";
-const PUBLIC_KEY = process.env.EXPO_PUBLIC_OMISE_PUBLIC_KEY ?? "";
 
 export interface OmiseCardInput {
   number: string;
@@ -12,8 +11,10 @@ export interface OmiseCardInput {
   securityCode: string;
 }
 
-export async function createOmiseToken(card: OmiseCardInput): Promise<string> {
-  const auth = btoa(`${PUBLIC_KEY}:`);
+// publicKey comes from GET /subscriptions/config (see pos-api.ts) rather than a build-time env
+// var, so a platform admin can rotate it from the settings page without anyone rebuilding the app.
+export async function createOmiseToken(card: OmiseCardInput, publicKey: string): Promise<string> {
+  const auth = btoa(`${publicKey}:`);
   const res = await fetch(VAULT_URL, {
     method: "POST",
     headers: {

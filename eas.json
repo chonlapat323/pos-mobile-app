@@ -14,15 +14,13 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api-pos.beautyup-enterprise.com",
-        "EXPO_PUBLIC_OMISE_PUBLIC_KEY": "pkey_test_67hn9nj36yjg7wlvvuj"
+        "EXPO_PUBLIC_API_URL": "https://api-pos.beautyup-enterprise.com"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api-pos.beautyup-enterprise.com",
-        "EXPO_PUBLIC_OMISE_PUBLIC_KEY": "CHANGE_ME_TO_LIVE_OMISE_PUBLIC_KEY"
+        "EXPO_PUBLIC_API_URL": "https://api-pos.beautyup-enterprise.com"
       }
     }
   },
