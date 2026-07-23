@@ -54,6 +54,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7a45ca4c-e905-453f-b1bd-9789c9ab9c45"
+      }
+    },
+    "owner": "saberakito"
   }
 }
